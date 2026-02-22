@@ -463,9 +463,17 @@ function getAdminHTML() {
     }
 
     @media (max-width: 768px) {
-      .hero-title { font-size: 40px; }
-      .nav { flex-direction: column; gap: 20px; }
-      .table-section { padding: 24px; }
+      .hero-title { font-size: 36px; }
+      .hero-subtitle { font-size: 16px; margin-bottom: 24px; }
+      .nav { flex-direction: column; gap: 16px; text-align: center; }
+      .nav-buttons { flex-direction: column; width: 100%; }
+      .btn-pill { width: 100%; text-align: center; }
+      .table-section { padding: 20px 16px; }
+      .table-title { font-size: 20px; }
+      td { padding: 16px 8px; font-size: 14px; }
+      th { font-size: 11px; }
+      .stats-grid { gap: 16px; }
+      .stat-card { padding: 24px 20px; }
     }
   </style>
 </head>
