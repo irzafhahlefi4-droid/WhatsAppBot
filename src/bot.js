@@ -178,7 +178,7 @@ async function handleExport(handler, userData) {
 async function startBot() {
     console.log('\n========================================');
     console.log('   WhatsApp Daily Assistant Bot');
-    console.log('   Powered by Baileys');
+    console.log('   Powered by Irza Fhahlefi');
     console.log('========================================\n');
 
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
