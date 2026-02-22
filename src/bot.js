@@ -37,6 +37,12 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..');
 const AUTH_DIR = path.join(DATA_DIR, 'auth_info');
 const logger = pino({ level: 'silent' });
 
+// --- Start Banner ---
+console.log('========================================');
+console.log('   WhatsApp Daily Assistant Bot');
+console.log('   Powered by Irza Fhahlefi');
+console.log('========================================\n');
+
 // --- Load Database ---
 loadDB();
 console.log('[BOT] Database loaded.');
@@ -176,10 +182,6 @@ async function handleExport(handler, userData) {
 // --- WhatsApp Connection ---
 
 async function startBot() {
-    console.log('\n========================================');
-    console.log('   WhatsApp Daily Assistant Bot');
-    console.log('   Powered by Irza Fhahlefi');
-    console.log('========================================\n');
 
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
 
