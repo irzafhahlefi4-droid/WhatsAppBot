@@ -8,7 +8,9 @@ const { loadDB, getUserCount } = require('./database');
 const path = require('path');
 const fs = require('fs');
 
-const ADMIN_PORT = 3000;
+const ADMIN_PORT = process.env.PORT || 3000;
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..');
+const DB_PATH = path.join(DATA_DIR, 'db.json');
 
 /**
  * Start the admin panel server.
@@ -19,7 +21,7 @@ function startAdmin() {
   // --- API Endpoints ---
 
   app.get('/api/stats', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'db.json'), 'utf-8'));
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
     const users = db.users || {};
     const userIds = Object.keys(users).filter(k => k !== '_legacy');
 
@@ -49,7 +51,7 @@ function startAdmin() {
   });
 
   app.get('/api/user/:id', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'db.json'), 'utf-8'));
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
     const userData = db.users?.[req.params.id];
     if (!userData) return res.status(404).json({ error: 'User not found' });
     res.json({ id: req.params.id, ...userData });

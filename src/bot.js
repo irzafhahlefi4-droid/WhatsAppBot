@@ -33,7 +33,8 @@ const { chatWithAI, isAIAvailable } = require('./ai');
 const { startAdmin } = require('./admin');
 
 // --- Config ---
-const AUTH_DIR = path.join(__dirname, '..', 'auth_info');
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..');
+const AUTH_DIR = path.join(DATA_DIR, 'auth_info');
 const logger = pino({ level: 'silent' });
 
 // --- Load Database ---
