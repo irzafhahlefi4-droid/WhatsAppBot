@@ -270,10 +270,10 @@ async function exportFinanceExcel(db) {
     summaryHeader.height = 24;
 
     const summaryItems = [
-        ['', '', 'Jumlah Transaksi', db.pengeluaran.length],
-        ['', '', 'Total Pengeluaran', grandTotal],
-        ['', '', 'Rata-rata per Transaksi', Math.round(grandTotal / db.pengeluaran.length)],
-        ['', '', 'Jumlah Hari', Object.keys(byDate).length],
+        ['', '', '', 'Jumlah Transaksi', db.pengeluaran.length],
+        ['', '', '', 'Total Pengeluaran', grandTotal],
+        ['', '', '', 'Rata-rata per Transaksi', Math.round(grandTotal / db.pengeluaran.length)],
+        ['', '', '', 'Jumlah Hari', Object.keys(byDate).length],
     ];
 
     summaryItems.forEach((data, idx) => {
@@ -281,7 +281,7 @@ async function exportFinanceExcel(db) {
         row.font = FONT.body;
         row.height = 18;
         if (idx === 1 || idx === 2) {
-            row.getCell(4).numFmt = ACCT_FMT;
+            row.getCell(5).numFmt = ACCT_FMT;
         }
     });
 
