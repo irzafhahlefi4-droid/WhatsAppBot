@@ -1,0 +1,26 @@
+{
+  "name": "whatsapp-daily-assistant",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot asisten harian personal & produktivitas menggunakan Baileys",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "node --watch src/bot.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "baileys",
+    "assistant"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.16",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "pino": "^9.6.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
