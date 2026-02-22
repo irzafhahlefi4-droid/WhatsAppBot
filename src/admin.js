@@ -540,7 +540,7 @@ function getAdminHTML() {
 
         document.getElementById('stats').innerHTML = \`
           <div class="stat-card">
-            <span class="stat-title">Users Downloaded</span>
+            <span class="stat-title">Users Active</span>
             <span class="stat-value">\${data.totalUsers}</span>
           </div>
           <div class="stat-card">
