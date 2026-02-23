@@ -26,7 +26,7 @@ const { loadDB, getUserData, getUserCount } = require('./database');
 const { handleHalo, handleJam } = require('./commands/general');
 const { handleMenu } = require('./commands/menu');
 const { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo } = require('./commands/todo');
-const { handleCatat, handleTotal, handleResetKeuangan } = require('./commands/finance');
+const { handleCatat, handleTotal, handleHapusPengeluaran, handleResetKeuangan } = require('./commands/finance');
 const { exportTodoExcel, exportFinanceExcel, cleanupExports } = require('./commands/export');
 const { handleCurhat, handleFallback } = require('./commands/curhat');
 const { chatWithAI, isAIAvailable } = require('./ai');
@@ -129,6 +129,12 @@ function routeCommand(text, userData) {
             return handleTodoList(userData);
         }
         return handleTodoAdd(userData, args);
+    }
+
+    // -- hapus [nomor] (keuangan) --
+    if (lower.startsWith('hapus')) {
+        const args = raw.substring(5).trim();
+        return handleHapusPengeluaran(userData, args);
     }
 
     // -- catat [nominal] [keterangan] --

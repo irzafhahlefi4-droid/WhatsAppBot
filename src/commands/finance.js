@@ -94,9 +94,41 @@ function handleTotal(db) {
     response += `\n----------------------------`;
     response += `\nTotal Keseluruhan : ${formatRupiah(totalAll)}`;
     response += `\nJumlah Transaksi  : ${db.pengeluaran.length}`;
-    response += `\n\nKetik "export keuangan" untuk unduh file Excel.`;
+    response += `\n\nKetik "hapus [nomor]" untuk hapus satu item.`;
+    response += `\nKetik "export keuangan" untuk unduh file Excel.`;
 
     return response;
+}
+
+/**
+ * Handle "hapus [nomor]" command — remove a single expense by number.
+ * @param {object} db - Database object
+ * @param {string} indexStr - The 1-based index string
+ * @returns {string}
+ */
+function handleHapusPengeluaran(db, indexStr) {
+    if (!db.pengeluaran || db.pengeluaran.length === 0) {
+        return 'Belum ada pengeluaran yang dicatat.\nGunakan: catat [nominal] [keterangan]';
+    }
+
+    if (!indexStr || indexStr.trim().length === 0) {
+        return 'Masukkan nomor pengeluaran yang ingin dihapus.\nContoh: hapus 1';
+    }
+
+    const index = parseInt(indexStr.trim(), 10);
+
+    if (isNaN(index)) {
+        return 'Nomor pengeluaran harus berupa angka.\nContoh: hapus 1';
+    }
+
+    if (index < 1 || index > db.pengeluaran.length) {
+        return `Nomor pengeluaran tidak valid.\nData yang tersedia: 1 - ${db.pengeluaran.length}`;
+    }
+
+    const removed = db.pengeluaran.splice(index - 1, 1)[0];
+    saveDB();
+
+    return `*Pengeluaran Dihapus*\n\nItem    : ${removed.keterangan}\nNominal : ${formatRupiah(removed.nominal)}\nWaktu   : ${removed.waktu}\n\nSisa transaksi: ${db.pengeluaran.length}`;
 }
 
 /**
@@ -119,4 +151,4 @@ function handleResetKeuangan(db) {
     return `*Data Keuangan Direset*\n\n${count} transaksi (${formatRupiah(totalAll)}) telah dihapus.\nData pengeluaran sekarang kosong.`;
 }
 
-module.exports = { handleCatat, handleTotal, handleResetKeuangan };
+module.exports = { handleCatat, handleTotal, handleHapusPengeluaran, handleResetKeuangan };

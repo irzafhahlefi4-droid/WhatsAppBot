@@ -39,6 +39,7 @@ ${tanggal} | ${jam} WIB
 > *catat* _[nominal] [ket]_
    _cth: catat 25000 makan siang_
 > *total* — Rekap pengeluaran
+> *hapus* _[no]_ — Hapus pengeluaran
 
 *4. Export Data*
 > *export todo* — Excel todo
