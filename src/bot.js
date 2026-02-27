@@ -368,13 +368,23 @@ async function startBot() {
                         chatReply = await chatWithAI(sender, text || '', imageBuffer, mimeType);
                         if (chatReply) {
                             console.log(`[AI] Response generated`);
+                        } else {
+                            // AI available but failed (rate limit etc) — send natural recovery message
+                            const recoveryMessages = [
+                                'Eh sorry ay, lagi gangguan bentar. Coba lagi ya?',
+                                'Hmm, koneksi aku agak ngadat nih. Ulangi ya sayang?',
+                                'Aduh, tadi keputus. Ngomong apa tadi?',
+                                'Sorry bentar, ulangi lagi dong ay',
+                            ];
+                            chatReply = recoveryMessages[Math.floor(Math.random() * recoveryMessages.length)];
+                            console.log(`[AI] Failed — sending recovery message`);
                         }
                     }
 
-                    // Fallback to keyword matching if AI returned nothing and it was a text message
-                    if (!chatReply && text) {
+                    // Keyword fallback ONLY when no AI key configured (no Gemini)
+                    if (!chatReply && !isAIAvailable() && text) {
                         chatReply = handleCurhat(text) || handleFallback(text);
-                        console.log(`[CHAT] Keyword fallback`);
+                        console.log(`[CHAT] Keyword fallback (no AI)`);
                     }
 
                     // Only send a message if we actually generated a chat reply
