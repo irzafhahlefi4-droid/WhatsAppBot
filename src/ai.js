@@ -77,7 +77,10 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
                 },
             };
             const textPart = { text: text || 'Komentari gambar ini dong' };
-            const result = await imageModel.generateContent([textPart, imagePart]);
+            const result = await imageModel.generateContent({
+                contents: [{ role: 'user', parts: [textPart, imagePart] }],
+                generationConfig: { maxOutputTokens: 800, temperature: 0.85 },
+            });
             const response = await result.response;
             reply = response.text().trim();
         } else {
@@ -90,7 +93,7 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
             const chat = chatModel.startChat({
                 history,
                 generationConfig: {
-                    maxOutputTokens: 300,
+                    maxOutputTokens: 800,
                     temperature: 0.85,
                 },
             });
