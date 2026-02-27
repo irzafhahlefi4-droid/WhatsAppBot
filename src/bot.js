@@ -71,6 +71,10 @@ function extractMessageText(message) {
         return message.extendedTextMessage.text;
     }
 
+    if (message.imageMessage) {
+        return message.imageMessage.caption || '';
+    }
+
     return null;
 }
 
@@ -293,9 +297,9 @@ async function startBot() {
                 console.log(`[MSG] Pesan: ${text}`);
 
                 // Route to command handler with user-specific data
-                const response = routeCommand(text, userData);
+                const response = routeCommand(text || '', userData);
 
-                if (response) {
+                if (response && text) {
                     const commandName = text.trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase();
                     console.log(`[CMD] Menjalankan: ${commandName}`);
 
@@ -322,22 +326,58 @@ async function startBot() {
                     // Non-command message — use AI or keyword fallback
                     let chatReply = null;
 
+                    // Extract Image Buffer if message contains an image
+                    let imageBuffer = null;
+                    let mimeType = null;
+                    const isImage = msg.message?.imageMessage || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
+
+                    if (isAIAvailable() && isImage) {
+                        try {
+                            console.log(`[BOT] Mendownload gambar dari ${pushName}...`);
+                            // downloadMediaMessage is a helper from baileys
+                            const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+
+                            // the message could be the main message or quoted message
+                            const targetMsg = msg.message?.imageMessage ? msg : {
+                                key: msg.key,
+                                message: msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
+                            };
+
+                            imageBuffer = await downloadMediaMessage(
+                                targetMsg,
+                                'buffer',
+                                {},
+                                {
+                                    logger,
+                                    reuploadRequest: sock.updateMediaMessage
+                                }
+                            );
+                            mimeType = targetMsg.message.imageMessage.mimetype || 'image/jpeg';
+                            console.log(`[BOT] Gambar berhasil didownload.`);
+                        } catch (imgErr) {
+                            console.error(`[ERR] Gagal mendownload media: ${imgErr}`);
+                        }
+                    }
+
                     // Try AI first
-                    if (isAIAvailable()) {
-                        chatReply = await chatWithAI(sender, text);
+                    if (isAIAvailable() && (text || imageBuffer)) {
+                        chatReply = await chatWithAI(sender, text || '', imageBuffer, mimeType);
                         if (chatReply) {
                             console.log(`[AI] Response generated`);
                         }
                     }
 
-                    // Fallback to keyword matching
-                    if (!chatReply) {
+                    // Fallback to keyword matching if AI returned nothing and it was a text message
+                    if (!chatReply && text) {
                         chatReply = handleCurhat(text) || handleFallback(text);
                         console.log(`[CHAT] Keyword fallback`);
                     }
 
-                    await sock.sendMessage(sender, { text: chatReply });
-                    console.log(`[CHAT] Response terkirim ke ${pushName}`);
+                    // Only send a message if we actually generated a chat reply
+                    if (chatReply) {
+                        await sock.sendMessage(sender, { text: chatReply });
+                        console.log(`[CHAT] Response terkirim ke ${pushName}`);
+                    }
                 }
 
                 console.log('');
