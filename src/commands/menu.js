@@ -40,10 +40,14 @@ ${tanggal} | ${jam} WIB
    _cth: catat 25000 makan siang_
 > *total* — Rekap pengeluaran
 > *hapus* _[no]_ — Hapus pengeluaran
+> *edit* _[no] [nominal] [ket]_
+   _cth: edit 1 30000 makan malam_
+   _edit 1 - makan malam (ket saja)_
 
 *4. Export Data*
 > *export todo* — Excel todo
 > *export keuangan* — Excel keuangan
+> *export pdf keuangan* — PDF keuangan
 
 *5. Reset Data*
 > *reset todo* — Hapus semua tugas

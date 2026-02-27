@@ -26,8 +26,8 @@ const { loadDB, getUserData, getUserCount } = require('./database');
 const { handleHalo, handleJam } = require('./commands/general');
 const { handleMenu } = require('./commands/menu');
 const { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo } = require('./commands/todo');
-const { handleCatat, handleTotal, handleHapusPengeluaran, handleResetKeuangan } = require('./commands/finance');
-const { exportTodoExcel, exportFinanceExcel, cleanupExports } = require('./commands/export');
+const { handleCatat, handleTotal, handleHapusPengeluaran, handleEditPengeluaran, handleResetKeuangan } = require('./commands/finance');
+const { exportTodoExcel, exportFinanceExcel, exportFinancePDF, cleanupExports } = require('./commands/export');
 const { handleCurhat, handleFallback } = require('./commands/curhat');
 const { chatWithAI, isAIAvailable } = require('./ai');
 const { startAdmin } = require('./admin');
@@ -89,6 +89,9 @@ function routeCommand(text, userData) {
     if (lower === 'export todo') {
         return { type: 'export', handler: 'todo' };
     }
+    if (lower === 'export pdf keuangan' || lower === 'export pdf pengeluaran') {
+        return { type: 'export', handler: 'keuangan-pdf' };
+    }
     if (lower === 'export keuangan' || lower === 'export pengeluaran') {
         return { type: 'export', handler: 'keuangan' };
     }
@@ -131,6 +134,12 @@ function routeCommand(text, userData) {
         return handleTodoAdd(userData, args);
     }
 
+    // -- edit [nomor] [nominal] [keterangan] (keuangan) --
+    if (lower.startsWith('edit')) {
+        const args = raw.substring(4).trim();
+        return handleEditPengeluaran(userData, args);
+    }
+
     // -- hapus [nomor] (keuangan) --
     if (lower.startsWith('hapus')) {
         const args = raw.substring(5).trim();
@@ -152,13 +161,14 @@ function routeCommand(text, userData) {
 }
 
 /**
- * Handle export command — generate Excel and return file buffer.
- * @param {string} handler - 'todo' or 'keuangan'
+ * Handle export command — generate Excel/PDF and return file buffer.
+ * @param {string} handler - 'todo', 'keuangan', or 'keuangan-pdf'
  * @param {object} userData - User-specific data
  * @returns {Promise<{text: string}|{document: Buffer, fileName: string, mimetype: string}>}
  */
 async function handleExport(handler, userData) {
     let result;
+    let mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
     if (handler === 'todo') {
         result = await exportTodoExcel(userData);
@@ -167,6 +177,12 @@ async function handleExport(handler, userData) {
         }
     } else if (handler === 'keuangan') {
         result = await exportFinanceExcel(userData);
+        if (!result) {
+            return { text: 'Tidak ada data pengeluaran untuk di-export.' };
+        }
+    } else if (handler === 'keuangan-pdf') {
+        result = await exportFinancePDF(userData);
+        mimetype = 'application/pdf';
         if (!result) {
             return { text: 'Tidak ada data pengeluaran untuk di-export.' };
         }
@@ -181,7 +197,7 @@ async function handleExport(handler, userData) {
     return {
         document: fileBuffer,
         fileName: result.fileName,
-        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        mimetype,
     };
 }
 

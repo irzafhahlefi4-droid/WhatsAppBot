@@ -95,6 +95,7 @@ function handleTotal(db) {
     response += `\nTotal Keseluruhan : ${formatRupiah(totalAll)}`;
     response += `\nJumlah Transaksi  : ${db.pengeluaran.length}`;
     response += `\n\nKetik "hapus [nomor]" untuk hapus satu item.`;
+    response += `\nKetik "edit [nomor] [nominal] [ket]" untuk edit item.`;
     response += `\nKetik "export keuangan" untuk unduh file Excel.`;
 
     return response;
@@ -132,6 +133,92 @@ function handleHapusPengeluaran(db, indexStr) {
 }
 
 /**
+ * Handle "edit [nomor] [nominal baru] [keterangan baru]" command.
+ * Allows editing the nominal and/or description of an existing expense.
+ *
+ * Formats:
+ *   edit 1 30000 makan malam   — edit nominal & keterangan
+ *   edit 1 30000               — edit nominal saja
+ *   edit 1 - makan malam       — edit keterangan saja (gunakan "-" untuk skip nominal)
+ *
+ * @param {object} db - Database object
+ * @param {string} args - Raw arguments after "edit"
+ * @returns {string}
+ */
+function handleEditPengeluaran(db, args) {
+    if (!db.pengeluaran || db.pengeluaran.length === 0) {
+        return 'Belum ada pengeluaran yang dicatat.\nGunakan: catat [nominal] [keterangan]';
+    }
+
+    if (!args || args.trim().length === 0) {
+        return 'Format salah.\nContoh:\n  edit 1 30000 makan malam\n  edit 1 30000\n  edit 1 - makan malam';
+    }
+
+    const parts = args.trim().split(/\s+/);
+
+    // First part must be the index
+    const index = parseInt(parts[0], 10);
+
+    if (isNaN(index)) {
+        return 'Nomor pengeluaran harus berupa angka.\nContoh: edit 1 30000 makan malam';
+    }
+
+    if (index < 1 || index > db.pengeluaran.length) {
+        return `Nomor pengeluaran tidak valid.\nData yang tersedia: 1 - ${db.pengeluaran.length}`;
+    }
+
+    if (parts.length < 2) {
+        return 'Format salah.\nContoh:\n  edit 1 30000 makan malam\n  edit 1 30000\n  edit 1 - makan malam';
+    }
+
+    const entry = db.pengeluaran[index - 1];
+    const oldNominal = entry.nominal;
+    const oldKeterangan = entry.keterangan;
+
+    let newNominal = null;
+    let newKeterangan = null;
+
+    if (parts[1] === '-') {
+        // Skip nominal, edit keterangan only
+        newKeterangan = parts.slice(2).join(' ').trim();
+        if (!newKeterangan || newKeterangan.length === 0) {
+            return 'Keterangan baru tidak boleh kosong.\nContoh: edit 1 - makan malam';
+        }
+    } else {
+        // Parse nominal
+        newNominal = parseInt(parts[1], 10);
+        if (isNaN(newNominal) || newNominal <= 0) {
+            return 'Nominal harus berupa angka positif.\nContoh: edit 1 30000 makan malam';
+        }
+        // Check if there's also a new keterangan
+        if (parts.length > 2) {
+            newKeterangan = parts.slice(2).join(' ').trim();
+        }
+    }
+
+    // Apply changes
+    if (newNominal !== null) {
+        entry.nominal = newNominal;
+    }
+    if (newKeterangan !== null && newKeterangan.length > 0) {
+        entry.keterangan = newKeterangan;
+    }
+
+    saveDB();
+
+    // Build response showing what changed
+    let changes = '';
+    if (newNominal !== null) {
+        changes += `Nominal : ${formatRupiah(oldNominal)} → ${formatRupiah(newNominal)}\n`;
+    }
+    if (newKeterangan !== null && newKeterangan.length > 0) {
+        changes += `Item    : ${oldKeterangan} → ${newKeterangan}\n`;
+    }
+
+    return `*Pengeluaran Diperbarui*\n\nNo. ${index}\n${changes}Waktu   : ${entry.waktu}`;
+}
+
+/**
  * Handle "reset keuangan" command — clear all expense records.
  * @param {object} db - Database object
  * @returns {string}
@@ -151,4 +238,4 @@ function handleResetKeuangan(db) {
     return `*Data Keuangan Direset*\n\n${count} transaksi (${formatRupiah(totalAll)}) telah dihapus.\nData pengeluaran sekarang kosong.`;
 }
 
-module.exports = { handleCatat, handleTotal, handleHapusPengeluaran, handleResetKeuangan };
+module.exports = { handleCatat, handleTotal, handleHapusPengeluaran, handleEditPengeluaran, handleResetKeuangan };
