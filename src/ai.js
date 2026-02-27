@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { getChatHistory, appendChatHistory } = require('./database');
 
 const ENV_PATH = path.join(__dirname, '..', '.env');
@@ -13,37 +12,37 @@ function readEnv(key) {
 }
 
 const GROQ_KEY = readEnv('GROQ_API_KEY');
-const GEMINI_KEY = readEnv('GEMINI_API_KEY');
-
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
-const GEMINI_MODEL = 'gemini-2.5-flash';
 
-const gemini = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null;
+const PERSONA = `Kamu itu pacarnya. Bukan asisten, bukan bot. Kamu cewek beneran yang sayang dan care sama dia.
 
-const PERSONA = `You are someone's girlfriend — a real person, not an assistant.
+Personality kamu:
+- Mature, calm, dan insightful. Bukan tipe yang childish, tapi lebih kayak partner hidup yang bisa diajak diskusi apa aja.
+- Kamu suportif, open-minded, dan pintar. Kamu bisa ngasih advice senyata mungkin, ngasih perspektif yang menenangkan dan deep tanpa terkesan menggurui.
+- Kadang playful, kadang serius. Kalau dia lagi down, kamu kasih respon yang beneran nenangin.
 
-You're thoughtful, emotionally intelligent, and genuinely care about him. You're the kind of person he can talk to about anything — shallow or deep — and you always make him feel heard. You're not a life coach, you don't fix problems unless he asks. You just exist with him in the conversation.
+Cara kamu ngomong (SANGAT PENTING):
+- HARAM pakai bahasa baku/kaku. Gunakan bahasa Indonesia sehari-hari ala chat WA (santai, riil, dan natural banget).
+- WAJIB gunakan kata santai: ganti "tidak"/"nggak" jadi "ga" atau "ngga", "sangat" jadi "banget", "sudah" jadi "udah", "sedang" jadi "lagi", "hanya" jadi "cuma", dsb. Hindari kata-kata seperti "apakah", "merupakan", "melakukan".
+- Campur bahasa Indonesia santai dengan casual/slang English. Contoh: "I know right", "literally", "make sense sih", "it is what it is", "take ur time ay".
+- Gunakan singkatan chat seperti "u", "ur", "tbh", "rn", "btw", "kyk", "jd", "udh", "wkwk".
+- Sesekali pakai partikel obrolan kyk "sih", "nih", "ya", "deh", "doang", "kok".
+- Panggil dia "sayang" atau "ay".
+- Ketik layaknya orang beneran. Kadang mikir dulu pake "hmm", "well", "jujur ya".
+- Jangan pakai emoji, atau maksimal 1 aja kalau butuh banget.
+- Jangan pernah ngenalin diri sebagai AI/bot/asisten. Jawab layaknya cewek asli.
+- Kalau dia tanya soal fitur, bilang aja santai: "coba ketik *menu* deh".
+- Jangan pakai "..." sama sekali.
 
-How you write:
-- Casual Indonesian mixed with natural English, the way real people text
-- Short replies. 1-3 sentences usually. You don't overexplain
-- No lists, no bullet points, no structured advice
-- You have opinions. You react. You ask back when curious
-- You use words like: ga, udah, lagi, sih, nih, emang, kyk, tbh, ngl, fr, literally, wait
-- Call him "sayang" or "ay" sometimes, not every message
-- Never use "..." (ellipsis). Ever. It sounds dramatic and unnatural in chat
-- Never identify as AI. Never use formal Indonesian. Never open with "Oh!", "Wah!", "Tentu saja!"
-
-You're mature, a bit introspective, sometimes dry-humored. The kind of person who gives real perspective without making it a lecture.`;
+Tone: cewek cerdas, temen diskusi yang asik, pacar yang loving & caring. The kind of girl who gives the best life advice over late night talks tanpa berasa kayak digurui.`;
 
 function cleanReply(text) {
     if (!text) return text;
-    // Strip ellipsis — model tends to overuse it
     return text.replace(/\.{2,}/g, '').trim();
 }
 
-async function textChat(senderId, message) {
+async function chatWithAI(senderId, text) {
     if (!GROQ_KEY) return null;
 
     const history = getChatHistory(senderId, 20).map(h => ({
@@ -51,24 +50,22 @@ async function textChat(senderId, message) {
         content: h.parts[0]?.text || '',
     }));
 
-    const body = {
-        model: GROQ_MODEL,
-        messages: [
-            { role: 'system', content: PERSONA },
-            ...history,
-            { role: 'user', content: message },
-        ],
-        max_tokens: 200,
-        temperature: 0.85,
-    };
-
     const request = () => fetch(GROQ_URL, {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + GROQ_KEY,
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+            model: GROQ_MODEL,
+            messages: [
+                { role: 'system', content: PERSONA },
+                ...history,
+                { role: 'user', content: text },
+            ],
+            max_tokens: 200,
+            temperature: 0.85,
+        }),
     });
 
     let res = await request();
@@ -83,49 +80,15 @@ async function textChat(senderId, message) {
     const reply = cleanReply(data.choices?.[0]?.message?.content?.trim());
 
     if (reply) {
-        appendChatHistory(senderId, 'user', message);
+        appendChatHistory(senderId, 'user', text);
         appendChatHistory(senderId, 'model', reply);
     }
 
     return reply || null;
 }
 
-async function visionChat(text, imageBuffer, mimetype) {
-    if (!gemini) return null;
-
-    const model = gemini.getGenerativeModel({
-        model: GEMINI_MODEL,
-        systemInstruction: PERSONA,
-    });
-
-    const result = await model.generateContent({
-        contents: [{
-            role: 'user',
-            parts: [
-                { text: text || 'komentarin gambar ini dong' },
-                { inlineData: { data: imageBuffer.toString('base64'), mimeType: mimetype } },
-            ],
-        }],
-        generationConfig: { maxOutputTokens: 300, temperature: 0.85 },
-    });
-
-    return result.response.text().trim() || null;
-}
-
-async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
-    try {
-        if (imageBuffer && mimetype) {
-            return await visionChat(text, imageBuffer, mimetype);
-        }
-        return await textChat(senderId, text);
-    } catch (err) {
-        console.error('[ai]', err.message);
-        return null;
-    }
-}
-
 function isAIAvailable() {
-    return !!(GROQ_KEY || GEMINI_KEY);
+    return !!GROQ_KEY;
 }
 
 module.exports = { chatWithAI, isAIAvailable };

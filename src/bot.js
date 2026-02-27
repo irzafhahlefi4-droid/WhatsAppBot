@@ -33,7 +33,7 @@ console.log('========================================\n');
 
 loadDB();
 console.log(`[bot] ${getUserCount()} user loaded`);
-console.log(`[bot] AI ${isAIAvailable() ? 'active (Groq + Gemini Vision)' : 'inactive'}`);
+console.log(`[bot] AI ${isAIAvailable() ? 'active (Groq)' : 'inactive'}`);
 
 startAdmin();
 
@@ -170,28 +170,10 @@ async function startBot() {
                 }
 
                 let imageBuffer = null;
-                let mimeType = null;
-
-                if (hasImage && isAIAvailable()) {
-                    try {
-                        const targetMsg = msg.message?.imageMessage ? msg : {
-                            key: msg.key,
-                            message: msg.message?.extendedTextMessage?.contextInfo?.quotedMessage,
-                        };
-                        imageBuffer = await downloadMediaMessage(targetMsg, 'buffer', {}, {
-                            logger,
-                            reuploadRequest: sock.updateMediaMessage,
-                        });
-                        mimeType = targetMsg.message.imageMessage.mimetype || 'image/jpeg';
-                    } catch (err) {
-                        console.error('[media]', err.message);
-                    }
-                }
-
                 let reply = null;
 
-                if (isAIAvailable() && (text || imageBuffer)) {
-                    reply = await chatWithAI(sender, text || '', imageBuffer, mimeType);
+                if (isAIAvailable() && text) {
+                    reply = await chatWithAI(sender, text);
                 }
 
                 if (!reply && !isAIAvailable() && text) {
