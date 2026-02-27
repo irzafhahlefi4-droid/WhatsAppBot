@@ -21,7 +21,7 @@ function handleHalo() {
     if (jam >= 4 && jam < 11) {
         return pick([
             'Morning sayang. Udah sarapan?',
-            'Morning say! hope u slept well',
+            'Morning ay! hope u slept well',
             'Pagi! I\'ve been waiting for u to text hehe',
             'Morning ay. Don\'t forget to hydrate ya',
             'Hai sayang, start ur day right ok?',
@@ -29,7 +29,7 @@ function handleHalo() {
     } else if (jam >= 11 && jam < 15) {
         return pick([
             'Hey sayang, have u eaten yet?',
-            'Hai say! don\'t forget to take a break tbh',
+            'Hai ay! don\'t forget to take a break tbh',
             'Lagi sibuk ya? make sure u eat ok?',
             'Hey ay, how\'s ur day so far?',
             'Hai sayang, don\'t overwork urself ya',
@@ -37,7 +37,7 @@ function handleHalo() {
     } else if (jam >= 15 && jam < 18) {
         return pick([
             'Hey sayang, how was ur day?',
-            'Hai say! tell me about ur day',
+            'Hai ay! tell me about ur day',
             'Sore sayang. U doing ok?',
             'Hey ay, lagi mikirin kamu hm',
             'Hai sayang, almost evening. How\'s everything?',
@@ -45,11 +45,11 @@ function handleHalo() {
     } else {
         return pick([
             'Hey sayang, don\'t stay up too late ok?',
-            'Hai say! have u had dinner?',
+            'Hai ay! have u had dinner?',
             'U still up hm? I appreciate the company',
             'Hey ay, how was ur day? tell me',
             'Night sayang. Take care of urself',
-            'Hai say, I\'m always here whenever u need me tbh',
+            'Hai ay, I\'m always here whenever u need me tbh',
         ]);
     }
 }

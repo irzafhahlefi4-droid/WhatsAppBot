@@ -13,7 +13,7 @@ const PATTERNS = [
         responses: [
             'Hey, what happened? cerita dong',
             'I\'m always here for u. Jangan sedih sendirian ya',
-            'It\'s okay say. Aku dengerin kok',
+            'It\'s okay ay. Aku dengerin kok',
             'Kamu boleh nangis, sometimes u just need to let it out',
             'Whatever it is, u are not alone in this',
         ],
@@ -49,7 +49,7 @@ const PATTERNS = [
     {
         keywords: ['stress', 'stres', 'pusing', 'overwhelm', 'overwork', 'pressure'],
         responses: [
-            'Don\'t overthink it say. One thing at a time aja',
+            'Don\'t overthink it ay. One thing at a time aja',
             'Pusing ya? step back dulu sebentar',
             'U don\'t have to figure it all out rn',
             'I believe in u. Tapi istirahat dulu pls',
@@ -69,7 +69,7 @@ const PATTERNS = [
         keywords: ['kangen', 'rindu', 'miss', 'missing'],
         responses: [
             'I miss u too',
-            'Missing u right back say',
+            'Missing u right back ay',
             'Kangen siapa sih u hm?',
         ],
     },
@@ -112,7 +112,7 @@ const PATTERNS = [
         responses: [
             'Honestly, maybe try to trust ur gut feeling on this',
             'Hmm, try looking at it from a different angle tbh',
-            'I trust ur judgment say. U know urself best',
+            'I trust ur judgment ay. U know urself best',
         ],
     },
     {
@@ -139,7 +139,7 @@ const PATTERNS = [
             'sekolah', 'pr', 'assignment'],
         responses: [
             'U can do this. Just take it one task at a time',
-            'I\'m proud of u for keeping at it say',
+            'I\'m proud of u for keeping at it ay',
             'Good luck! I totally believe in u',
             'Imagine how good it\'ll feel when it\'s all done',
         ],
@@ -171,7 +171,7 @@ const PATTERNS = [
             'Confused about what? maybe I can help',
             'It\'s ok not to know literally everything right away',
             'Let\'s figure it out together',
-            'Take ur time say. No rush',
+            'Take ur time ay. No rush',
         ],
     },
     {
@@ -179,7 +179,7 @@ const PATTERNS = [
         responses: [
             'Anything for u. Literally',
             'U don\'t have to thank me hehe',
-            'Always, say',
+            'Always, ay',
             'Of course',
         ],
     },
@@ -230,13 +230,13 @@ const PATTERNS = [
         responses: [
             'Good night, sayang. Sleep well',
             'Night! get some good rest ok?',
-            'Sweet dreams say. Talk to u tmrw',
+            'Sweet dreams ay. Talk to u tmrw',
         ],
     },
     {
         keywords: ['pagi', 'selamat pagi', 'morning', 'good morning', 'met pagi'],
         responses: [
-            'Morning say! udah sarapan?',
+            'Morning ay! udah sarapan?',
             'Good morning sayang. Hope today is good to u',
             'Pagi! don\'t forget to hydrate ya',
         ],
@@ -254,7 +254,7 @@ const PATTERNS = [
         keywords: ['oke', 'ok', 'sip', 'siap', 'iya', 'yoi', 'yup', 'yep', 'bet'],
         responses: [
             'Ok, let me know kalau butuh apa-apa',
-            'Got it say',
+            'Got it ay',
             'Alright sayang',
         ],
     },
@@ -296,7 +296,7 @@ function handleFallback(text) {
         return pick([
             'Hm? go on',
             'And then?',
-            'Tell me more say',
+            'Tell me more ay',
             'Yeah?',
         ]);
     }
@@ -314,7 +314,7 @@ function handleFallback(text) {
         return pick([
             'I read everything. Thanks for telling me',
             'That\'s a lot to process. I\'m always here for u',
-            'I hear u say. U are not alone in this',
+            'I hear u ay. U are not alone in this',
             'Thanks for trusting me with this. It means a lot',
         ]);
     }
