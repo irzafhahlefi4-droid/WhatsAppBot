@@ -1,6 +1,6 @@
 /**
  * Export commands — generate Excel and PDF files for todo and finance data.
- * Uses ExcelJS for .xlsx and PDFKit for .pdf files.
+ * Clean, minimal, black-and-white accounting style.
  */
 
 const ExcelJS = require('exceljs');
@@ -18,43 +18,22 @@ if (!fs.existsSync(EXPORT_DIR)) {
 // SHARED HELPERS
 // =============================================
 
-/** Professional color palette */
-const COLOR = {
-    primary: 'FF1A3C5E',  // Dark navy blue
-    primaryLight: 'FF2C5F8A',  // Medium blue
-    headerBg: 'FF1A3C5E',  // Dark navy for headers
-    headerText: 'FFFFFFFF',  // White
-    subtotalBg: 'FFF0F4F8',  // Light blue-gray
-    subtotalText: 'FF1A3C5E',  // Navy
-    totalBg: 'FFE8EEF4',  // Slightly darker blue-gray
-    totalText: 'FF1A3C5E',  // Navy
-    bodyAlt: 'FFFAFBFC',  // Very light gray for alternating rows
-    bodyWhite: 'FFFFFFFF',  // White
-    borderLight: 'FFD0D5DD',  // Light gray border
-    borderMedium: 'FF98A2B3',  // Medium gray border
-    borderDark: 'FF1A3C5E',  // Dark border for totals
-    footerText: 'FF98A2B3',  // Muted gray
-    summaryLabel: 'FF475467',  // Dark gray for labels
-    summaryValue: 'FF1A3C5E',  // Navy for values
-};
-
 const FONT = {
-    title: { name: 'Calibri', size: 14, bold: true, color: { argb: COLOR.primary } },
-    subtitle: { name: 'Calibri', size: 9, italic: true, color: { argb: COLOR.footerText } },
-    header: { name: 'Calibri', size: 10, bold: true, color: { argb: COLOR.headerText } },
-    body: { name: 'Calibri', size: 10, color: { argb: 'FF344054' } },
-    subtotal: { name: 'Calibri', size: 10, bold: true, italic: true, color: { argb: COLOR.subtotalText } },
-    total: { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR.totalText } },
-    footer: { name: 'Calibri', size: 8, italic: true, color: { argb: COLOR.footerText } },
-    summaryLabel: { name: 'Calibri', size: 10, color: { argb: COLOR.summaryLabel } },
-    summaryValue: { name: 'Calibri', size: 10, bold: true, color: { argb: COLOR.summaryValue } },
+    title: { name: 'Calibri', size: 14, bold: true },
+    subtitle: { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF666666' } },
+    header: { name: 'Calibri', size: 10, bold: true },
+    body: { name: 'Calibri', size: 10 },
+    subtotal: { name: 'Calibri', size: 10, bold: true, italic: true },
+    total: { name: 'Calibri', size: 11, bold: true },
+    footer: { name: 'Calibri', size: 8, italic: true, color: { argb: 'FF999999' } },
+    summaryLabel: { name: 'Calibri', size: 10 },
+    summaryValue: { name: 'Calibri', size: 10, bold: true },
 };
 
-const BORDER_LIGHT = { style: 'thin', color: { argb: COLOR.borderLight } };
-const BORDER_MEDIUM = { style: 'thin', color: { argb: COLOR.borderMedium } };
-const BORDER_DARK = { style: 'medium', color: { argb: COLOR.borderDark } };
-const BORDER_DOUBLE_DARK = { style: 'double', color: { argb: COLOR.borderDark } };
-const BORDER_NONE = { style: 'none' };
+const THIN = { style: 'thin', color: { argb: 'FF000000' } };
+const MEDIUM = { style: 'medium', color: { argb: 'FF000000' } };
+const DOUBLE = { style: 'double', color: { argb: 'FF000000' } };
+const NONE = { style: 'none' };
 
 const ACCT_FMT = '_(\"Rp\"* #,##0_)';
 
@@ -83,22 +62,20 @@ function formatRupiah(num) {
     }).format(num);
 }
 
-/** Apply full border to a cell */
-function applyBorder(cell, top, bottom, left, right) {
-    cell.border = { top, bottom, left, right };
-}
-
-/** Apply all-around light border to row cells */
-function applyRowBorders(row, colCount, topBorder, bottomBorder) {
-    const t = topBorder || BORDER_LIGHT;
-    const b = bottomBorder || BORDER_LIGHT;
+/** Apply border to all cells in a row */
+function borderRow(row, colCount, top, bottom) {
     for (let i = 1; i <= colCount; i++) {
-        applyBorder(row.getCell(i), t, b, BORDER_LIGHT, BORDER_LIGHT);
+        row.getCell(i).border = {
+            top: top || THIN,
+            bottom: bottom || THIN,
+            left: THIN,
+            right: THIN,
+        };
     }
 }
 
 // =============================================
-// GROUP EXPENSES BY DATE (shared helper)
+// GROUP EXPENSES BY DATE
 // =============================================
 
 function groupByDate(pengeluaran) {
@@ -113,9 +90,7 @@ function groupByDate(pengeluaran) {
 
 function extractTime(waktu) {
     const timePart = waktu.split(',')[1]?.trim() || '';
-    if (timePart) {
-        return timePart.split('.').slice(0, 2).join(':');
-    }
+    if (timePart) return timePart.split('.').slice(0, 2).join(':');
     return '';
 }
 
@@ -130,22 +105,20 @@ async function exportTodoExcel(db) {
     workbook.creator = 'WhatsApp Assistant Bot';
     const sheet = workbook.addWorksheet('Todo List');
 
-    // Column widths
     sheet.getColumn(1).width = 8;
     sheet.getColumn(2).width = 48;
     sheet.getColumn(3).width = 18;
+    const COL = 3;
 
-    const COL_COUNT = 3;
-
-    // ── Title ──
+    // Title
     sheet.mergeCells('A1:C1');
     const title = sheet.getCell('A1');
     title.value = 'DAFTAR TUGAS';
     title.font = FONT.title;
     title.alignment = { horizontal: 'center', vertical: 'middle' };
-    sheet.getRow(1).height = 32;
+    sheet.getRow(1).height = 30;
 
-    // ── Subtitle ──
+    // Subtitle
     sheet.mergeCells('A2:C2');
     const sub = sheet.getCell('A2');
     sub.value = `Diekspor: ${getExportDate()}, ${getExportTime()} WIB`;
@@ -153,55 +126,42 @@ async function exportTodoExcel(db) {
     sub.alignment = { horizontal: 'center' };
     sheet.getRow(2).height = 18;
 
-    // ── Spacer ──
     sheet.getRow(3).height = 6;
 
-    // ── Header ──
+    // Header
     const hdr = sheet.addRow(['No', 'Tugas', 'Status']);
     hdr.font = FONT.header;
     hdr.height = 26;
-    hdr.alignment = { vertical: 'middle' };
-    for (let i = 1; i <= COL_COUNT; i++) {
-        const cell = hdr.getCell(i);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.headerBg } };
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        applyBorder(cell, BORDER_DARK, BORDER_DARK, BORDER_LIGHT, BORDER_LIGHT);
+    for (let i = 1; i <= COL; i++) {
+        hdr.getCell(i).alignment = { horizontal: 'center', vertical: 'middle' };
+        hdr.getCell(i).border = { top: MEDIUM, bottom: MEDIUM, left: THIN, right: THIN };
     }
 
-    // ── Data rows ──
+    // Data
     db.todo.forEach((task, idx) => {
         const row = sheet.addRow([idx + 1, task, 'Belum Selesai']);
         row.font = FONT.body;
         row.height = 22;
         row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
         row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
-
-        // Alternating row color
-        const bgColor = idx % 2 === 0 ? COLOR.bodyWhite : COLOR.bodyAlt;
-        for (let i = 1; i <= COL_COUNT; i++) {
-            row.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-        }
-        applyRowBorders(row, COL_COUNT, BORDER_LIGHT, BORDER_LIGHT);
+        borderRow(row, COL, THIN, THIN);
     });
 
-    // ── Total row ──
+    // Total
     const totalRow = sheet.addRow(['', `Total: ${db.todo.length} tugas`, '']);
     totalRow.font = FONT.total;
     totalRow.height = 24;
-    for (let i = 1; i <= COL_COUNT; i++) {
-        totalRow.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.totalBg } };
-        applyBorder(totalRow.getCell(i), BORDER_DARK, BORDER_DARK, BORDER_LIGHT, BORDER_LIGHT);
+    for (let i = 1; i <= COL; i++) {
+        totalRow.getCell(i).border = { top: MEDIUM, bottom: DOUBLE, left: THIN, right: THIN };
     }
 
-    // ── Footer ──
-    const spacer = sheet.addRow([]);
-    spacer.height = 12;
+    // Footer
+    const sp = sheet.addRow([]); sp.height = 12;
     sheet.mergeCells(`A${sheet.rowCount + 1}:C${sheet.rowCount + 1}`);
-    const footerCell = sheet.getCell(`A${sheet.rowCount}`);
-    footerCell.value = `Dibuat oleh WhatsApp Assistant by Irza Fhahlefi — ${getExportDate()}, ${getExportTime()} WIB`;
-    footerCell.font = FONT.footer;
-    footerCell.alignment = { horizontal: 'center' };
-    sheet.getRow(sheet.rowCount).height = 16;
+    const fc = sheet.getCell(`A${sheet.rowCount}`);
+    fc.value = `Dibuat oleh WhatsApp Assistant by Irza Fhahlefi — ${getExportDate()}, ${getExportTime()} WIB`;
+    fc.font = FONT.footer;
+    fc.alignment = { horizontal: 'center' };
 
     const fileName = `Todo_List_${getTimestamp()}.xlsx`;
     const filePath = path.join(EXPORT_DIR, fileName);
@@ -210,7 +170,7 @@ async function exportTodoExcel(db) {
 }
 
 // =============================================
-// FINANCE EXPORT — EXCEL (Accounting Style)
+// FINANCE EXPORT — EXCEL
 // =============================================
 
 async function exportFinanceExcel(db) {
@@ -222,42 +182,35 @@ async function exportFinanceExcel(db) {
         pageSetup: { paperSize: 9, orientation: 'portrait' },
     });
 
-    // Column widths
-    sheet.getColumn(1).width = 18;  // Tanggal
-    sheet.getColumn(2).width = 10;  // Jam
-    sheet.getColumn(3).width = 6;   // No
-    sheet.getColumn(4).width = 36;  // Keterangan
-    sheet.getColumn(5).width = 22;  // Jumlah
+    sheet.getColumn(1).width = 18;
+    sheet.getColumn(2).width = 10;
+    sheet.getColumn(3).width = 6;
+    sheet.getColumn(4).width = 36;
+    sheet.getColumn(5).width = 22;
+    const COL = 5;
 
-    const COL_COUNT = 5;
-
-    // ══════════ HEADER ══════════
-
-    // Row 1: Title
+    // Title
     sheet.mergeCells('A1:E1');
     const titleCell = sheet.getCell('A1');
     titleCell.value = 'LAPORAN PENGELUARAN';
     titleCell.font = { ...FONT.title, size: 16 };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    sheet.getRow(1).height = 38;
+    sheet.getRow(1).height = 36;
 
-    // Row 2: Period
+    // Period
     sheet.mergeCells('A2:E2');
     const periodCell = sheet.getCell('A2');
     const dates = db.pengeluaran.map(e => e.waktu.split(',')[0]?.trim()).filter(Boolean);
     const uniqueDates = [...new Set(dates)];
     let periodText = '';
-    if (uniqueDates.length === 1) {
-        periodText = `Periode: ${uniqueDates[0]}`;
-    } else if (uniqueDates.length > 1) {
-        periodText = `Periode: ${uniqueDates[0]} s/d ${uniqueDates[uniqueDates.length - 1]}`;
-    }
+    if (uniqueDates.length === 1) periodText = `Periode: ${uniqueDates[0]}`;
+    else if (uniqueDates.length > 1) periodText = `Periode: ${uniqueDates[0]} s/d ${uniqueDates[uniqueDates.length - 1]}`;
     periodCell.value = periodText;
     periodCell.font = FONT.subtitle;
     periodCell.alignment = { horizontal: 'center' };
-    sheet.getRow(2).height = 20;
+    sheet.getRow(2).height = 18;
 
-    // Row 3: Export timestamp
+    // Export time
     sheet.mergeCells('A3:E3');
     const tsCell = sheet.getCell('A3');
     tsCell.value = `Diekspor: ${getExportDate()}, ${getExportTime()} WIB`;
@@ -265,29 +218,24 @@ async function exportFinanceExcel(db) {
     tsCell.alignment = { horizontal: 'center' };
     sheet.getRow(3).height = 16;
 
-    // Row 4: Spacer
     sheet.getRow(4).height = 8;
 
-    // ══════════ TABLE HEADER ══════════
-
+    // Table Header
     const headerRow = sheet.addRow(['Tanggal', 'Jam', 'No', 'Keterangan', 'Jumlah (Rp)']);
     headerRow.font = FONT.header;
     headerRow.height = 28;
-    for (let i = 1; i <= COL_COUNT; i++) {
-        const cell = headerRow.getCell(i);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.headerBg } };
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        applyBorder(cell, BORDER_DARK, BORDER_DARK, BORDER_LIGHT, BORDER_LIGHT);
+    for (let i = 1; i <= COL; i++) {
+        headerRow.getCell(i).alignment = { horizontal: 'center', vertical: 'middle' };
+        headerRow.getCell(i).border = { top: MEDIUM, bottom: MEDIUM, left: THIN, right: THIN };
     }
 
-    // ══════════ DATA ROWS ══════════
-
+    // Data
     const byDate = groupByDate(db.pengeluaran);
     const dateKeys = Object.keys(byDate);
     const hasMultipleDates = dateKeys.length > 1;
     let globalIndex = 0;
 
-    dateKeys.forEach((date, dateIdx) => {
+    dateKeys.forEach((date) => {
         const entries = byDate[date];
         let dateSubtotal = 0;
 
@@ -295,11 +243,9 @@ async function exportFinanceExcel(db) {
             globalIndex++;
             dateSubtotal += item.nominal;
 
-            const formattedTime = extractTime(item.waktu);
-
             const row = sheet.addRow([
                 idx === 0 ? date : '',
-                formattedTime,
+                extractTime(item.waktu),
                 globalIndex,
                 item.keterangan,
                 item.nominal,
@@ -313,66 +259,44 @@ async function exportFinanceExcel(db) {
             row.getCell(4).alignment = { vertical: 'middle', wrapText: true };
             row.getCell(5).numFmt = ACCT_FMT;
             row.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-
-            // Alternating row color
-            const bgColor = globalIndex % 2 === 0 ? COLOR.bodyAlt : COLOR.bodyWhite;
-            for (let i = 1; i <= COL_COUNT; i++) {
-                row.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-            }
-
-            // Borders on every data cell
-            applyRowBorders(row, COL_COUNT, BORDER_LIGHT, BORDER_LIGHT);
+            borderRow(row, COL, THIN, THIN);
         });
 
-        // ── Subtotal per date ──
+        // Subtotal per date
         if (hasMultipleDates) {
-            const subRow = sheet.addRow(['', '', '', `Subtotal — ${date}`, dateSubtotal]);
+            const subRow = sheet.addRow(['', '', '', `Subtotal ${date}`, dateSubtotal]);
             subRow.font = FONT.subtotal;
             subRow.height = 24;
             subRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
             subRow.getCell(5).numFmt = ACCT_FMT;
             subRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-
-            for (let i = 1; i <= COL_COUNT; i++) {
-                const cell = subRow.getCell(i);
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.subtotalBg } };
-                applyBorder(cell, BORDER_MEDIUM, BORDER_MEDIUM, BORDER_LIGHT, BORDER_LIGHT);
+            for (let i = 1; i <= COL; i++) {
+                subRow.getCell(i).border = { top: THIN, bottom: THIN, left: THIN, right: THIN };
             }
         }
     });
 
-    // ══════════ GRAND TOTAL ══════════
-
+    // Grand Total
     const grandTotal = db.pengeluaran.reduce((sum, e) => sum + e.nominal, 0);
-
     const totalRow = sheet.addRow(['', '', '', 'TOTAL PENGELUARAN', grandTotal]);
     totalRow.font = FONT.total;
-    totalRow.height = 30;
+    totalRow.height = 28;
     totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
     totalRow.getCell(5).numFmt = ACCT_FMT;
     totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-
-    for (let i = 1; i <= COL_COUNT; i++) {
-        const cell = totalRow.getCell(i);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.totalBg } };
-        applyBorder(cell, BORDER_DARK, BORDER_DOUBLE_DARK, BORDER_LIGHT, BORDER_LIGHT);
+    for (let i = 1; i <= COL; i++) {
+        totalRow.getCell(i).border = { top: MEDIUM, bottom: DOUBLE, left: THIN, right: THIN };
     }
 
-    // ══════════ SUMMARY ══════════
+    // Summary
+    const sp1 = sheet.addRow([]); sp1.height = 14;
 
-    const spacer1 = sheet.addRow([]);
-    spacer1.height = 14;
-
-    // Summary header
     const summaryHdr = sheet.addRow(['', '', '', 'RINGKASAN', '']);
-    summaryHdr.font = { ...FONT.total, size: 10 };
+    summaryHdr.font = FONT.header;
     summaryHdr.height = 24;
-    summaryHdr.getCell(4).alignment = { vertical: 'middle' };
     for (let i = 4; i <= 5; i++) {
-        const cell = summaryHdr.getCell(i);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR.headerBg } };
-        cell.font = { ...FONT.header, size: 10 };
-        applyBorder(cell, BORDER_DARK, BORDER_DARK, BORDER_LIGHT, BORDER_LIGHT);
+        summaryHdr.getCell(i).border = { top: MEDIUM, bottom: MEDIUM, left: THIN, right: THIN };
+        summaryHdr.getCell(i).alignment = { vertical: 'middle' };
     }
 
     const summaryItems = [
@@ -389,38 +313,25 @@ async function exportFinanceExcel(db) {
         row.getCell(4).alignment = { vertical: 'middle' };
         row.getCell(5).font = FONT.summaryValue;
         row.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-
-        if (idx === 1 || idx === 2) {
-            row.getCell(5).numFmt = ACCT_FMT;
-        }
-
-        // Alternating colors for summary
-        const bg = idx % 2 === 0 ? COLOR.bodyWhite : COLOR.bodyAlt;
+        if (idx === 1 || idx === 2) row.getCell(5).numFmt = ACCT_FMT;
         for (let i = 4; i <= 5; i++) {
-            row.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
-            applyBorder(row.getCell(i), BORDER_LIGHT, BORDER_LIGHT, BORDER_LIGHT, BORDER_LIGHT);
+            row.getCell(i).border = { top: THIN, bottom: THIN, left: THIN, right: THIN };
         }
     });
 
-    // Bottom border on last summary row
+    // Bottom border on last summary
+    const lastRow = sheet.getRow(sheet.rowCount);
     for (let i = 4; i <= 5; i++) {
-        const lastRow = sheet.getRow(sheet.rowCount);
-        applyBorder(lastRow.getCell(i), BORDER_LIGHT, BORDER_DARK, BORDER_LIGHT, BORDER_LIGHT);
+        lastRow.getCell(i).border = { top: THIN, bottom: MEDIUM, left: THIN, right: THIN };
     }
 
-    // ══════════ FOOTER ══════════
-
-    const spacer2 = sheet.addRow([]);
-    spacer2.height = 16;
-
+    // Footer
+    const sp2 = sheet.addRow([]); sp2.height = 16;
     sheet.mergeCells(`A${sheet.rowCount + 1}:E${sheet.rowCount + 1}`);
     const footerCell = sheet.getCell(`A${sheet.rowCount}`);
     footerCell.value = `Laporan dibuat otomatis oleh WhatsApp Assistant by Irza Fhahlefi — ${getExportDate()}, ${getExportTime()} WIB`;
     footerCell.font = FONT.footer;
     footerCell.alignment = { horizontal: 'center' };
-    sheet.getRow(sheet.rowCount).height = 16;
-
-    // ══════════ SAVE ══════════
 
     const fileName = `Laporan_Keuangan_${getTimestamp()}.xlsx`;
     const filePath = path.join(EXPORT_DIR, fileName);
@@ -429,7 +340,7 @@ async function exportFinanceExcel(db) {
 }
 
 // =============================================
-// FINANCE EXPORT — PDF (Corporate Style)
+// FINANCE EXPORT — PDF
 // =============================================
 
 async function exportFinancePDF(db) {
@@ -447,21 +358,12 @@ async function exportFinancePDF(db) {
 
         doc.pipe(stream);
 
-        const pageWidth = doc.page.width - 80; // total usable width
+        const pageWidth = doc.page.width - 80;
+        const black = '#000000';
+        const gray = '#666666';
+        const lightGray = '#999999';
 
-        // Color helpers (hex without #)
-        const navy = '#1A3C5E';
-        const mediumBlue = '#2C5F8A';
-        const darkGray = '#344054';
-        const medGray = '#475467';
-        const lightGray = '#98A2B3';
-        const subtotalBg = '#F0F4F8';
-        const totalBg = '#E8EEF4';
-        const altRowBg = '#FAFBFC';
-        const white = '#FFFFFF';
-        const borderColor = '#D0D5DD';
-
-        // ── Column definitions ──
+        // Column definitions
         const colDefs = [
             { label: 'Tanggal', width: pageWidth * 0.18 },
             { label: 'Jam', width: pageWidth * 0.10 },
@@ -473,80 +375,64 @@ async function exportFinancePDF(db) {
         const tableLeft = 40;
         const tableWidth = colDefs.reduce((s, c) => s + c.width, 0);
 
-        /** Draw a filled rectangle */
-        function drawRect(x, y, w, h, fillColor) {
-            doc.save();
-            doc.rect(x, y, w, h).fill(fillColor);
-            doc.restore();
+        function drawLine(x, y, w, weight) {
+            doc.save().moveTo(x, y).lineTo(x + w, y)
+                .strokeColor(black).lineWidth(weight || 0.5).stroke().restore();
         }
 
-        /** Draw horizontal line */
-        function drawHLine(x, y, w, color, lineWidth) {
-            doc.save();
-            doc.moveTo(x, y).lineTo(x + w, y).strokeColor(color).lineWidth(lineWidth || 0.5).stroke();
-            doc.restore();
+        function drawCellBorder(x, y, w, h) {
+            doc.save().rect(x, y, w, h)
+                .strokeColor(black).lineWidth(0.5).stroke().restore();
         }
 
-        /** Draw cell borders (all 4 sides) */
-        function drawCellBorders(x, y, w, h, color) {
-            doc.save();
-            doc.rect(x, y, w, h).strokeColor(color).lineWidth(0.5).stroke();
-            doc.restore();
-        }
-
-        /** Draw a table row with cell borders */
         function drawTableRow(y, values, options = {}) {
             const {
-                fillColor = white,
-                fontColor = darkGray,
+                fontColor = black,
                 fontSize = 9,
                 bold = false,
                 alignments = ['left', 'center', 'center', 'left', 'right'],
                 height = 22,
-                borderCol = borderColor,
+                topBorder = 0.5,
+                bottomBorder = 0.5,
             } = options;
-
-            // Fill background
-            drawRect(tableLeft, y, tableWidth, height, fillColor);
 
             // Draw cell borders
             let x = tableLeft;
             colDefs.forEach((col, i) => {
-                drawCellBorders(x, y, col.width, height, borderCol);
+                drawCellBorder(x, y, col.width, height);
 
-                // Text
                 const padding = 6;
-                const textX = alignments[i] === 'right' ? x + col.width - padding
-                    : alignments[i] === 'center' ? x + col.width / 2
-                        : x + padding;
                 const textAlign = alignments[i];
+                const textY = y + (height - fontSize) / 2;
 
                 doc.save();
                 doc.font(bold ? 'Helvetica-Bold' : 'Helvetica')
                     .fontSize(fontSize)
                     .fillColor(fontColor);
 
-                const textOpts = { width: col.width - padding * 2, align: textAlign };
-                const textY = y + (height - fontSize) / 2;
-
-                if (textAlign === 'right') {
-                    doc.text(String(values[i] || ''), x + padding, textY, textOpts);
-                } else if (textAlign === 'center') {
-                    doc.text(String(values[i] || ''), x + padding, textY, textOpts);
-                } else {
-                    doc.text(String(values[i] || ''), x + padding, textY, textOpts);
-                }
+                doc.text(String(values[i] || ''), x + padding, textY, {
+                    width: col.width - padding * 2,
+                    align: textAlign,
+                });
                 doc.restore();
 
                 x += col.width;
             });
 
+            // Thicker borders if specified
+            if (topBorder > 0.5) {
+                drawLine(tableLeft, y, tableWidth, topBorder);
+            }
+            if (bottomBorder > 0.5) {
+                drawLine(tableLeft, y + height, tableWidth, bottomBorder);
+            }
+
             return y + height;
         }
 
-        // ══════════ TITLE ══════════
+        // ── TITLE ──
 
-        doc.font('Helvetica-Bold').fontSize(18).fillColor(navy);
+        doc.font('Helvetica-Bold').fontSize(16).fillColor(black);
         doc.text('LAPORAN PENGELUARAN', tableLeft, 40, {
             width: tableWidth, align: 'center',
         });
@@ -555,36 +441,31 @@ async function exportFinancePDF(db) {
         const dates = db.pengeluaran.map(e => e.waktu.split(',')[0]?.trim()).filter(Boolean);
         const uniqueDates = [...new Set(dates)];
         let periodText = '';
-        if (uniqueDates.length === 1) {
-            periodText = `Periode: ${uniqueDates[0]}`;
-        } else if (uniqueDates.length > 1) {
-            periodText = `Periode: ${uniqueDates[0]} s/d ${uniqueDates[uniqueDates.length - 1]}`;
-        }
+        if (uniqueDates.length === 1) periodText = `Periode: ${uniqueDates[0]}`;
+        else if (uniqueDates.length > 1) periodText = `Periode: ${uniqueDates[0]} s/d ${uniqueDates[uniqueDates.length - 1]}`;
 
-        doc.font('Helvetica').fontSize(9).fillColor(lightGray);
-        doc.text(periodText, tableLeft, 64, { width: tableWidth, align: 'center' });
+        doc.font('Helvetica').fontSize(9).fillColor(gray);
+        doc.text(periodText, tableLeft, 62, { width: tableWidth, align: 'center' });
 
-        // Export timestamp
         doc.font('Helvetica').fontSize(8).fillColor(lightGray);
-        doc.text(`Diekspor: ${getExportDate()}, ${getExportTime()} WIB`, tableLeft, 78, {
+        doc.text(`Diekspor: ${getExportDate()}, ${getExportTime()} WIB`, tableLeft, 76, {
             width: tableWidth, align: 'center',
         });
 
-        // ══════════ TABLE HEADER ══════════
+        // ── TABLE HEADER ──
 
-        let currentY = 100;
+        let currentY = 98;
 
         currentY = drawTableRow(currentY, colDefs.map(c => c.label), {
-            fillColor: navy,
-            fontColor: white,
             bold: true,
             fontSize: 9,
             height: 26,
             alignments: ['center', 'center', 'center', 'center', 'center'],
-            borderCol: navy,
+            topBorder: 1.5,
+            bottomBorder: 1.5,
         });
 
-        // ══════════ DATA ROWS ══════════
+        // ── DATA ROWS ──
 
         const byDate = groupByDate(db.pengeluaran);
         const dateKeys = Object.keys(byDate);
@@ -600,10 +481,6 @@ async function exportFinancePDF(db) {
                 globalIndex++;
                 dateSubtotal += item.nominal;
 
-                const formattedTime = extractTime(item.waktu);
-                const bgColor = globalIndex % 2 === 0 ? altRowBg : white;
-
-                // Check if we need a new page
                 if (currentY > doc.page.height - 100) {
                     doc.addPage();
                     currentY = 40;
@@ -611,18 +488,13 @@ async function exportFinancePDF(db) {
 
                 currentY = drawTableRow(currentY, [
                     idx === 0 ? date : '',
-                    formattedTime,
+                    extractTime(item.waktu),
                     globalIndex,
                     item.keterangan,
                     formatRupiah(item.nominal),
-                ], {
-                    fillColor: bgColor,
-                    fontColor: darkGray,
-                    height: 22,
-                });
+                ], { height: 22 });
             });
 
-            // Subtotal per date
             if (hasMultipleDates) {
                 if (currentY > doc.page.height - 100) {
                     doc.addPage();
@@ -630,20 +502,17 @@ async function exportFinancePDF(db) {
                 }
 
                 currentY = drawTableRow(currentY, [
-                    '', '', '', `Subtotal — ${date}`, formatRupiah(dateSubtotal),
+                    '', '', '', `Subtotal ${date}`, formatRupiah(dateSubtotal),
                 ], {
-                    fillColor: subtotalBg,
-                    fontColor: navy,
                     bold: true,
                     fontSize: 9,
                     height: 24,
                     alignments: ['left', 'center', 'center', 'right', 'right'],
-                    borderCol: '#98A2B3',
                 });
             }
         });
 
-        // ══════════ GRAND TOTAL ══════════
+        // ── GRAND TOTAL ──
 
         if (currentY > doc.page.height - 120) {
             doc.addPage();
@@ -653,19 +522,18 @@ async function exportFinancePDF(db) {
         currentY = drawTableRow(currentY, [
             '', '', '', 'TOTAL PENGELUARAN', formatRupiah(grandTotal),
         ], {
-            fillColor: totalBg,
-            fontColor: navy,
             bold: true,
             fontSize: 10,
             height: 28,
             alignments: ['left', 'center', 'center', 'right', 'right'],
-            borderCol: navy,
+            topBorder: 1.5,
+            bottomBorder: 0.5,
         });
 
-        // Extra bottom border (double line effect)
-        drawHLine(tableLeft, currentY, tableWidth, navy, 1.5);
+        // Double bottom line
+        drawLine(tableLeft, currentY, tableWidth, 1.5);
 
-        // ══════════ SUMMARY ══════════
+        // ── SUMMARY ──
 
         currentY += 16;
 
@@ -674,16 +542,17 @@ async function exportFinancePDF(db) {
             currentY = 40;
         }
 
-        // Summary header
         const summaryLeft = tableLeft + colDefs[0].width + colDefs[1].width + colDefs[2].width;
-        const summaryWidth = colDefs[3].width + colDefs[4].width;
         const summaryCol1 = colDefs[3].width;
         const summaryCol2 = colDefs[4].width;
+        const summaryWidth = summaryCol1 + summaryCol2;
 
-        drawRect(summaryLeft, currentY, summaryWidth, 24, navy);
-        drawCellBorders(summaryLeft, currentY, summaryWidth, 24, navy);
-        doc.font('Helvetica-Bold').fontSize(9).fillColor(white);
-        doc.text('RINGKASAN', summaryLeft + 6, currentY + 7, { width: summaryWidth - 12, align: 'left' });
+        // Summary header
+        drawCellBorder(summaryLeft, currentY, summaryWidth, 24);
+        drawLine(summaryLeft, currentY, summaryWidth, 1.5);
+        drawLine(summaryLeft, currentY + 24, summaryWidth, 1.5);
+        doc.font('Helvetica-Bold').fontSize(9).fillColor(black);
+        doc.text('RINGKASAN', summaryLeft + 6, currentY + 7, { width: summaryWidth - 12 });
         currentY += 24;
 
         const summaryItems = [
@@ -693,18 +562,15 @@ async function exportFinancePDF(db) {
             ['Jumlah Hari', String(dateKeys.length)],
         ];
 
-        summaryItems.forEach((item, idx) => {
-            const bg = idx % 2 === 0 ? white : altRowBg;
+        summaryItems.forEach((item) => {
             const rowH = 20;
+            drawCellBorder(summaryLeft, currentY, summaryCol1, rowH);
+            drawCellBorder(summaryLeft + summaryCol1, currentY, summaryCol2, rowH);
 
-            drawRect(summaryLeft, currentY, summaryWidth, rowH, bg);
-            drawCellBorders(summaryLeft, currentY, summaryCol1, rowH, borderColor);
-            drawCellBorders(summaryLeft + summaryCol1, currentY, summaryCol2, rowH, borderColor);
-
-            doc.font('Helvetica').fontSize(9).fillColor(medGray);
+            doc.font('Helvetica').fontSize(9).fillColor(black);
             doc.text(item[0], summaryLeft + 6, currentY + 5, { width: summaryCol1 - 12 });
 
-            doc.font('Helvetica-Bold').fontSize(9).fillColor(navy);
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(black);
             doc.text(item[1], summaryLeft + summaryCol1 + 6, currentY + 5, {
                 width: summaryCol2 - 12, align: 'right',
             });
@@ -712,13 +578,11 @@ async function exportFinancePDF(db) {
             currentY += rowH;
         });
 
-        // Bottom border of summary
-        drawHLine(summaryLeft, currentY, summaryWidth, navy, 1);
+        drawLine(summaryLeft, currentY, summaryWidth, 1.5);
 
-        // ══════════ FOOTER ══════════
+        // ── FOOTER ──
 
         currentY += 20;
-
         if (currentY > doc.page.height - 40) {
             doc.addPage();
             currentY = 40;
@@ -730,13 +594,8 @@ async function exportFinancePDF(db) {
             tableLeft, currentY, { width: tableWidth, align: 'center' }
         );
 
-        // ══════════ FINALIZE ══════════
-
         doc.end();
-
-        stream.on('finish', () => {
-            resolve({ filePath, fileName });
-        });
+        stream.on('finish', () => resolve({ filePath, fileName }));
         stream.on('error', reject);
     });
 }
@@ -751,9 +610,9 @@ function cleanupExports() {
         const files = fs.readdirSync(EXPORT_DIR);
         const oneHourAgo = Date.now() - 60 * 60 * 1000;
         files.forEach(file => {
-            const filePath = path.join(EXPORT_DIR, file);
-            const stat = fs.statSync(filePath);
-            if (stat.mtimeMs < oneHourAgo) fs.unlinkSync(filePath);
+            const fp = path.join(EXPORT_DIR, file);
+            const stat = fs.statSync(fp);
+            if (stat.mtimeMs < oneHourAgo) fs.unlinkSync(fp);
         });
     } catch (err) {
         console.error('[EXPORT] Gagal membersihkan file export lama:', err.message);
