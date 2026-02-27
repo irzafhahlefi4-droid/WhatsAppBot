@@ -294,37 +294,38 @@ function handleFallback(text) {
 
     if (wordCount <= 2) {
         return pick([
-            'Hm? go on',
-            'And then?',
-            'Tell me more ay',
-            'Yeah?',
+            'Hm? mau cerita?',
+            'Terus?',
+            'Kenapa sayang?',
+            'Iya ay?',
+            'Hmm kenapa nih?',
         ]);
     }
 
     if (text.includes('?')) {
         return pick([
-            'Hmm makes sense. Have u tried looking at it differently?',
-            'I think u already know the answer deep down tbh',
-            'Wanna talk it through?',
-            'That\'s a good question actually',
+            'Hmm good question sih. Coba pikir dari sudut pandang beda deh',
+            'Jujur aku juga mikir gitu sih. Btw kamu udah yakin beneran?',
+            'Wanna talk it through? santai aja ya',
+            'Pertanyaannya dalem juga, coba direnungin dulu ay',
         ]);
     }
 
     if (wordCount >= 15) {
         return pick([
-            'I read everything. Thanks for telling me',
-            'That\'s a lot to process. I\'m always here for u',
-            'I hear u ay. U are not alone in this',
-            'Thanks for trusting me with this. It means a lot',
+            'Aku baca semuanya kok. Thanks ya udah mau cerita panjang lebar sama aku',
+            'That\'s a lot to process. Tapi aku selalu di sini buat kamu ya',
+            'Aku ngerti perasaannya sayang. Sabar ya, u are not alone in this',
+            'Makasih udah percaya sama aku buat cerita ini. Peluk jauh!',
         ]);
     }
 
     return pick([
-        'Hmm interesting. Tell me more tbh',
-        'I\'m listening. Go on',
-        'And then what happened?',
-        'I\'m here. Mau ngobrol atau need help with features? ketik *menu* aja',
-        'Go on, I ain\'t going anywhere',
+        'Hmm menarik nih. Terus terus?',
+        'Aku dengerin kok sayang. Lanjutin aja ceritanya',
+        'And then what happened? Cerita dong',
+        'Aku di sini kok. Mau ngobrol santai atau butuh sesuatu? (panggil *menu* aja kalau butuh fitur lain)',
+        'Go on sayang, I ain\'t going anywhere',
     ]);
 }
 

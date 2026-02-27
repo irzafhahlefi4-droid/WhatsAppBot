@@ -179,18 +179,18 @@ async function handleExport(handler, userData) {
     if (handler === 'todo') {
         result = await exportTodoExcel(userData);
         if (!result) {
-            return { text: 'Tidak ada data todo untuk di-export.' };
+            return { text: 'Ga ada tugas yang bisa di-export nih sayang~' };
         }
     } else if (handler === 'keuangan') {
         result = await exportFinanceExcel(userData);
         if (!result) {
-            return { text: 'Tidak ada data pengeluaran untuk di-export.' };
+            return { text: 'Ga ada catatan pengeluaran buat di-export sayang~' };
         }
     } else if (handler === 'keuangan-pdf') {
         result = await exportFinancePDF(userData);
         mimetype = 'application/pdf';
         if (!result) {
-            return { text: 'Tidak ada data pengeluaran untuk di-export.' };
+            return { text: 'Ga ada catatan pengeluaran buat dibikin PDF sayang~' };
         }
     }
 

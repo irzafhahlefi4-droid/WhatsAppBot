@@ -11,7 +11,7 @@ const { saveDB } = require('../database');
  */
 function handleTodoList(db) {
     if (!db.todo || db.todo.length === 0) {
-        return '*Daftar Tugas*\n\nBelum ada tugas.\nTambahkan dengan: todo [isi tugas]';
+        return '*Daftar Tugas*\n\nBelum ada tugas kok sayang~\nKetik *todo [isi tugas]* buat nambahin ya';
     }
 
     let list = '*Daftar Tugas*\n----------------------------\n\n';
@@ -22,7 +22,7 @@ function handleTodoList(db) {
 
     list += `\n----------------------------`;
     list += `\nTotal: ${db.todo.length} tugas`;
-    list += `\nKetik "done [nomor]" untuk menghapus tugas.`;
+    list += `\nKetik "done [nomor]" buat nyelesaiin tugas ya sayang~`;
 
     return list;
 }
@@ -35,13 +35,13 @@ function handleTodoList(db) {
  */
 function handleTodoAdd(db, task) {
     if (!task || task.trim().length === 0) {
-        return 'Format salah.\nContoh: todo beli susu';
+        return 'Formatnya salah sayang~\nContohnya gini ya: *todo beli susu*';
     }
 
     db.todo.push(task.trim());
     saveDB();
 
-    return `Tugas berhasil ditambahkan.\n\n"${task.trim()}"\n\nTotal tugas saat ini: ${db.todo.length}`;
+    return `Tugasnya udah aku catetin ya sayang~\n\n"${task.trim()}"\n\nSekarang total tugas kamu ada ${db.todo.length}`;
 }
 
 /**
@@ -52,23 +52,23 @@ function handleTodoAdd(db, task) {
  */
 function handleTodoDone(db, indexStr) {
     if (!indexStr || indexStr.trim().length === 0) {
-        return 'Masukkan nomor tugas yang ingin dihapus.\nContoh: done 1';
+        return 'Pilih nomor tugas yang mau dihapus sayang~\nContohnya: *done 1*';
     }
 
     const index = parseInt(indexStr.trim(), 10);
 
     if (isNaN(index)) {
-        return 'Nomor tugas harus berupa angka.\nContoh: done 1';
+        return 'Nomornya harus angka ya sayang~\nContoh: *done 1*';
     }
 
     if (index < 1 || index > db.todo.length) {
-        return `Nomor tugas tidak valid.\nTugas yang tersedia: 1 - ${db.todo.length}`;
+        return `Nomor tugasnya ga ada sayang~\nCuma ada tugas 1 - ${db.todo.length} kok`;
     }
 
     const removed = db.todo.splice(index - 1, 1)[0];
     saveDB();
 
-    return `Tugas dihapus: "${removed}"\n\nSisa tugas: ${db.todo.length}`;
+    return `Good job sayang! Tugas ini udah selesai dan aku hapus ya:\n"${removed}"\n\nSisa tugas kamu tinggal ${db.todo.length} lagi, semangat!`;
 }
 
 /**
@@ -80,13 +80,13 @@ function handleResetTodo(db) {
     const count = db.todo.length;
 
     if (count === 0) {
-        return 'Tidak ada data tugas untuk direset.';
+        return 'Emang ga ada tugas buat direset kok sayang~';
     }
 
     db.todo = [];
     saveDB();
 
-    return `*Data Todo Direset*\n\n${count} tugas telah dihapus.\nDaftar tugas sekarang kosong.`;
+    return `*Data Todo Direset*\n\nOke sayang, ${count} tugas udah aku hapus semua.\nSekarang daftar tugas kamu bersih lagi!`;
 }
 
 module.exports = { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo };
