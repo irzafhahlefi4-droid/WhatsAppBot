@@ -1,6 +1,6 @@
 /**
- * Curhat / Chat module — natural girlfriend-style responses.
- * Used as fallback when AI is unavailable.
+ * Curhat / Chat module — mature, bilingual girlfriend responses.
+ * Fallback when AI is unavailable.
  */
 
 function pick(arr) {
@@ -11,281 +11,268 @@ const PATTERNS = [
     {
         keywords: ['sedih', 'sad', 'nangis', 'galau', 'patah hati', 'down', 'drop', 'terpuruk'],
         responses: [
-            'Kamu kenapa say? cerita dong',
-            'Hey, jangan sedih sendirian. Aku di sini',
-            'Kamu boleh nangis kok, kadang emang butuh gitu',
-            'Aku ga suka liat kamu sedih... peluk ya',
-            'Apapun yang terjadi, kamu ga sendirian',
+            'Hey, what happened? cerita dong',
+            'I\'m here for you. Jangan sedih sendirian ya',
+            'It\'s okay to feel that way. Aku dengerin',
+            'Kamu boleh nangis kok, sometimes you just need to let it out',
+            'Whatever it is, you\'re not alone in this',
         ],
     },
     {
         keywords: ['capek', 'cape', 'lelah', 'tired', 'exhausted', 'penat'],
         responses: [
-            'Istirahat dulu dong sayang',
-            'Cape ya? sini istirahat dulu',
-            'Jangan dipaksain terus ya',
-            'Kamu udah kerja keras banget hari ini',
-            'Tarik napas dulu... pelan-pelan aja',
+            'Take a break, sayang. You deserve it',
+            'Cape ya? rest dulu, don\'t push yourself too hard',
+            'I know you\'ve been working hard. Istirahat dulu ya',
+            'Listen to your body. Kalau cape ya stop dulu',
+            'You\'ve done enough for today. Rest, okay?',
         ],
     },
     {
         keywords: ['bosan', 'bosen', 'gabut', 'boring', 'suntuk'],
         responses: [
-            'Bosen ya? chat aku aja terus hehe',
-            'Yuk ngobrol aja',
-            'Mau coba apa hari ini?',
-            'Sini cerita apa aja deh biar ga bosen',
-            'Aku juga bosen kalau ga chat sama kamu',
+            'Bosen? talk to me then hehe',
+            'Let\'s chat aja, aku juga lagi free',
+            'Hmm try something new today?',
+            'I\'m bored too kalau ga chat sama kamu',
         ],
     },
     {
         keywords: ['senang', 'happy', 'bahagia', 'seru', 'asik', 'yeay', 'yey', 'hore'],
         responses: [
-            'Seneng denger kamu happy!',
-            'Ikut bahagia kalau kamu seneng~',
-            'Senyum kamu itu bikin aku ikut senyum tau ga',
-            'Cerita dong apa yang bikin happy!',
-            'Good vibes nih hari ini ya',
+            'I love seeing you happy. Tell me about it',
+            'That makes me happy too, sayang',
+            'Your happiness is contagious, you know that?',
+            'Cerita dong what made your day!',
         ],
     },
     {
         keywords: ['stress', 'stres', 'pusing', 'overwhelm', 'overwork', 'pressure'],
         responses: [
-            'Jangan terlalu dipikirin ya sayang',
-            'Pusing ya? coba istirahat dulu',
-            'Kamu ga harus handle semuanya sendirian',
-            'Satu langkah aja dulu. Pelan-pelan',
-            'Aku tau bebannya berat, tapi kamu udah survive sampai sini',
+            'Don\'t overthink it, say. One thing at a time',
+            'Pusing ya? take a step back dulu',
+            'You don\'t have to figure it all out today',
+            'I believe in you. Tapi istirahat dulu ya',
+            'That sounds tough. Wanna talk about it?',
         ],
     },
     {
         keywords: ['marah', 'kesel', 'bete', 'annoyed', 'emosi', 'sebel', 'jengkel'],
         responses: [
-            'Kesel ya? cerita dong',
-            'Jangan sampe bikin kamu sakit ya sayang',
-            'Aku ngerti perasaan kamu',
-            'Tarik napas dulu ya...',
-            'Mau cerita? aku dengerin',
+            'What happened? cerita aja',
+            'I get it. That must be really frustrating',
+            'Vent all you want, I\'m listening',
+            'Take a deep breath first. Then tell me everything',
         ],
     },
     {
         keywords: ['kangen', 'rindu', 'miss', 'missing'],
         responses: [
-            'Aku juga kangen kamu',
-            'Miss you too say',
-            'Kangen siapa sih? hehe',
-            'Aku juga selalu kangen sama kamu kok',
+            'I miss you too, always',
+            'Missing you right back, say',
+            'Kamu kangen siapa sih hm?',
         ],
     },
     {
         keywords: ['takut', 'khawatir', 'cemas', 'anxious', 'anxiety', 'worry', 'panik'],
         responses: [
-            'Jangan takut, aku di sini',
-            'Coba fokus ke hal yang bisa kamu kontrol aja dulu',
-            'Tarik napas pelan-pelan... kamu aman kok',
-            'Kamu lebih kuat dari yang kamu pikir',
+            'Hey, it\'s okay. I\'m right here',
+            'Focus on what you can control for now',
+            'You\'re stronger than you think, sayang',
+            'Breathe. Satu langkah aja dulu',
         ],
     },
     {
         keywords: ['lapar', 'laper', 'hungry', 'lemes'],
         responses: [
-            'Makan dulu dong sayang, jangan sampe telat',
-            'Kamu belum makan ya?',
-            'Ayo makan dulu!',
-            'Jangan skip meal ya',
+            'Go eat something, sayang. Don\'t skip meals',
+            'Have you eaten? please don\'t skip ya',
+            'Eat first, everything else can wait',
         ],
     },
     {
         keywords: ['gak bisa tidur', 'insomnia', 'ga bisa tidur', 'gabisa tidur', 'melek', 'susah tidur'],
         responses: [
-            'Ga bisa tidur ya? coba taruh HP dulu',
-            'Minum air anget dulu sayang',
-            'Cerita aja sama aku biar lega',
-            'Aku temenin sampe kamu ngantuk ya',
+            'Can\'t sleep? try putting your phone down for a bit',
+            'Drink something warm, sayang. Might help',
+            'I\'ll keep you company until you\'re sleepy',
         ],
     },
     {
         keywords: ['hujan', 'ujan'],
         responses: [
-            'Hujan ya? jangan lupa bawa jaket',
-            'Enaknya minum yang anget nih',
-            'Jangan kehujanan ya',
+            'Rainy day huh? don\'t forget your jacket',
+            'Perfect weather for something warm',
+            'Stay dry, sayang',
         ],
     },
     {
         keywords: ['menurut lu', 'menurut lo', 'menurut kamu', 'pendapat lu', 'pendapat lo',
             'gimana menurut', 'apa menurut', 'lu pikir', 'lo pikir', 'kamu pikir'],
         responses: [
-            'Menurut aku sih, ikutin kata hati kamu aja',
-            'Hmm coba liat dari sisi lain dulu',
-            'Aku percaya apapun keputusan kamu pasti udah dipikirin matang',
-            'Trust your gut aja say',
+            'Honestly, I think you should trust your gut on this one',
+            'Hmm, try looking at it from a different angle',
+            'I trust your judgment, sayang. You know yourself best',
         ],
     },
     {
         keywords: ['saran', 'advice', 'solusi', 'gimana ya', 'gimana dong', 'harus gimana',
             'enaknya gimana', 'bagusnya gimana', 'sebaiknya'],
         responses: [
-            'Coba breakdown masalahnya jadi bagian kecil',
-            'Ceritain lebih detail ya, biar aku bisa bantu mikir',
-            'Kadang solusi terbaik itu yang paling simple',
-            'Jangan buru-buru ambil keputusan',
+            'Break it down into smaller pieces. Don\'t overwhelm yourself',
+            'Tell me more, biar aku bisa help you think it through',
+            'Sometimes the simplest answer is the right one',
+            'Don\'t rush into anything. Take your time',
         ],
     },
     {
         keywords: ['kerja', 'kerjaan', 'kantor', 'office', 'meeting', 'deadline'],
         responses: [
-            'Semangat kerjanya! jangan lupa istirahat juga',
-            'Deadline? aku percaya kamu bisa',
-            'Jangan sampe burnout ya sayang',
-            'Satu-satu aja, pasti kelar',
+            'You got this. But don\'t forget to rest too, okay?',
+            'Deadline? I know you can handle it. One step at a time',
+            'Don\'t burn yourself out, sayang',
+            'Work hard, but take care of yourself harder',
         ],
     },
     {
         keywords: ['kuliah', 'kampus', 'tugas', 'skripsi', 'thesis', 'ujian', 'exam', 'belajar',
             'sekolah', 'pr', 'assignment'],
         responses: [
-            'Kamu pasti bisa! satu-satu aja',
-            'Semangat belajarnya say!',
-            'Good luck! tinggal percaya sama diri sendiri',
-            'Bayangin leganya kalau udah selesai',
+            'You can do this. Just take it one task at a time',
+            'I\'m proud of you for keeping at it, say',
+            'Good luck! I believe in you',
+            'Imagine how good it\'ll feel when it\'s all done',
         ],
     },
     {
         keywords: ['ga berguna', 'gak berguna', 'ga bisa apa-apa', 'jelek', 'bodoh',
             'gak pantes', 'ga pantes', 'worthless', 'useless', 'payah'],
         responses: [
-            'Hey, jangan ngomong gitu dong',
-            'Kamu itu luar biasa tau ga',
-            'Jangan terlalu keras sama diri sendiri',
-            'Aku sayang kamu apa adanya',
+            'Hey, don\'t say that about yourself',
+            'You are more than enough. I mean it',
+            'Don\'t be so hard on yourself, sayang',
+            'I love you as you are. And that\'s not gonna change',
         ],
     },
     {
         keywords: ['gila', 'anjir', 'anjay', 'mantap', 'keren', 'wow', 'gokil',
             'sumpah', 'buset', 'demi apa'],
         responses: [
-            'Serius?? cerita dong!',
-            'Apaan sih, lanjutin!',
-            'Aku penasaran nih',
-            'No way, spill more dong',
+            'Wait, seriously?? tell me more',
+            'No way, what happened?',
+            'Okay now I\'m curious',
+            'Spill everything',
         ],
     },
     {
         keywords: ['bingung', 'gatau', 'ga tau', 'gak tau', 'ga ngerti', 'ga paham',
             'confused', 'ga mudeng', 'pusing mikir'],
         responses: [
-            'Bingung soal apa? ceritain ke aku',
-            'Ga ngerti gapapa, itu artinya lagi belajar sesuatu baru',
-            'Yuk dipecah satu-satu',
-            'Take your time aja say',
+            'What are you confused about? maybe I can help',
+            'It\'s okay not to know everything right away',
+            'Let\'s figure it out together',
+            'Take your time, say. No rush',
         ],
     },
     {
         keywords: ['makasih', 'terima kasih', 'thanks', 'thank you', 'thx', 'tq', 'tengkyu'],
         responses: [
-            'Sama-sama sayang',
-            'Ga usah makasih-makasih segala hehe',
-            'Buat kamu apapun deh',
-            'Anytime say',
+            'Anything for you, sayang',
+            'You don\'t have to thank me hehe',
+            'Always, say',
+            'Of course',
         ],
     },
     {
         keywords: ['lucu', 'wkwk', 'haha', 'lol', 'ngakak', 'kwkw', 'awkwk', 'xixi', 'hihi'],
         responses: [
-            'Hahaha ikut ketawa dong',
-            'Apaan sih wkwk',
-            'Kamu emang bisa bikin suasana rame ya',
-            'Ngakak deh',
+            'Hahaha what is it, tell me',
+            'You always know how to make me laugh',
+            'Lol okay that\'s funny',
         ],
     },
     {
         keywords: ['semangat', 'motivasi', 'motivate', 'bisa ga ya', 'bisa gak ya'],
         responses: [
-            'Kamu pasti bisa! aku percaya',
-            'Progress is progress, no matter how small',
-            'Keep going, aku di sini',
-            'The best time to start is now',
+            'You can. I believe in you, always',
+            'Every little progress counts. Keep going',
+            'You\'re doing better than you think, sayang',
         ],
     },
     {
         keywords: ['setuju', 'bener', 'betul', 'iya sih', 'emang', 'iya ya'],
         responses: [
-            'Kan! great minds think alike',
-            'Bener banget',
-            'Kamu sebenernya udah tau jawabannya sendiri',
-            'Nah itu dia',
+            'Right? great minds think alike',
+            'See, you already knew the answer',
+            'Exactly',
         ],
     },
     {
         keywords: ['siapa lu', 'lu siapa', 'lo siapa', 'siapa lo', 'nama lu', 'nama lo',
             'kamu siapa', 'siapa kamu', 'nama kamu'],
         responses: [
-            'Aku yang selalu ada buat kamu dong. Ketik *menu* kalau mau tau apa aja yang bisa aku bantu',
-            'Masa ga kenal aku sih hehe. Ketik *menu* aja ya sayang',
+            'I\'m the one who\'s always here for you. Ketik *menu* kalau mau tau what I can do',
+            'You really don\'t know me? hm. Ketik *menu* aja ya sayang',
         ],
     },
     {
         keywords: ['apa kabar', 'gimana kabar', 'how are you', 'kabar lu', 'lu gimana',
             'lo gimana', 'baik-baik aja', 'kabar kamu', 'kamu gimana'],
         responses: [
-            'Baik! kamu gimana?',
-            'Alhamdulillah baik. Kamu sendiri?',
-            'Aku baik kalau kamu juga baik',
-            'Baik kok, kamu baik-baik aja kan?',
+            'I\'m good! how about you?',
+            'Doing well, sayang. You okay?',
+            'I\'m fine as long as you are',
         ],
     },
     {
         keywords: ['met tidur', 'selamat tidur', 'good night', 'tidur dulu', 'mau tidur',
             'ngantuk', 'tidur ya', 'bobo'],
         responses: [
-            'Good night sayang, tidur yang nyenyak ya',
-            'Met bobo! jangan lupa selimutan',
-            'Night! besok kita chat lagi ya',
-            'Istirahat yang cukup ya',
+            'Good night, sayang. Sleep well',
+            'Night! get some good rest, okay?',
+            'Sweet dreams, say. Talk to you tomorrow',
         ],
     },
     {
         keywords: ['pagi', 'selamat pagi', 'morning', 'good morning', 'met pagi'],
         responses: [
-            'Pagi say! udah sarapan belum?',
-            'Morning! semoga hari ini menyenangkan',
-            'Pagi sayang~ jangan lupa minum air putih',
+            'Morning, say! have you had breakfast?',
+            'Good morning sayang. Hope today treats you well',
+            'Pagi! don\'t forget to hydrate ya',
         ],
     },
     {
         keywords: ['makan apa', 'makan siang', 'makan malam', 'sarapan', 'breakfast',
             'lunch', 'dinner', 'enaknya makan'],
         responses: [
-            'Makan yang enak ya! jangan lupa catat pengeluarannya',
-            'Yang penting makan teratur',
-            'Makan dulu baru lanjut aktivitas',
-            'Udah makan belum? jangan sampe telat',
+            'Eat well, sayang. Jangan lupa catat pengeluarannya',
+            'Have you eaten properly today?',
+            'Eat first, then we can talk',
         ],
     },
     {
         keywords: ['oke', 'ok', 'sip', 'siap', 'iya', 'yoi', 'yup', 'yep', 'bet'],
         responses: [
-            'Sip! kalau butuh apa-apa bilang aja',
-            'Oke say',
-            'Siap sayang',
+            'Okay, let me know if you need anything',
+            'Got it, say',
+            'Alright, sayang',
         ],
     },
     {
         keywords: ['gak mau', 'ga mau', 'nggak', 'engga', 'ogah', 'males', 'malas'],
         responses: [
-            'Gapapa, ga maksa kok',
-            'Oke santai aja',
-            'Yaudah nanti aja kalau udah siap',
+            'That\'s fine, no pressure',
+            'Okay, whenever you\'re ready then',
+            'Fair enough hehe',
         ],
     },
     {
         keywords: ['lagi apa', 'lagi ngapain', 'ngapain', 'lu ngapain', 'lo ngapain',
             'kamu ngapain', 'doing what'],
         responses: [
-            'Lagi nungguin kamu chat dong hehe',
-            'Lagi mikirin kamu~ kamu lagi apa?',
-            'Ga ngapa-ngapain, kamu?',
+            'Thinking about you, obviously hehe',
+            'Waiting for you to text me, as always',
+            'Nothing much. What about you?',
         ],
     },
 ];
@@ -307,37 +294,37 @@ function handleFallback(text) {
 
     if (wordCount <= 2) {
         return pick([
-            'Hmm? lanjutin dong',
-            'Terus?',
-            'Cerita lebih lengkap dong sayang',
-            'Iya? kenapa?',
+            'Hm? go on',
+            'And then?',
+            'Tell me more, sayang',
+            'Yeah?',
         ]);
     }
 
     if (text.includes('?')) {
         return pick([
-            'Hmm, coba pikirin dari sudut pandang yang beda deh',
-            'Kamu sebenernya udah tau jawabannya',
-            'Mau diskusi lebih lanjut?',
-            'Aku ga punya semua jawaban, tapi aku bisa temenin mikir',
+            'Hmm, try looking at it differently',
+            'I think you already know the answer deep down',
+            'Want to talk it through?',
+            'That\'s a good question actually',
         ]);
     }
 
     if (wordCount >= 15) {
         return pick([
-            'Aku baca semuanya. Makasih ya udah mau cerita',
-            'Banyak banget ya yang kamu rasain...',
-            'Aku dengerin. Kamu ga sendirian',
-            'Makasih udah percaya sama aku sayang',
+            'I read everything. Thank you for telling me',
+            'That\'s a lot to carry. I\'m here for you',
+            'I hear you, sayang. You\'re not alone in this',
+            'Thanks for trusting me with this',
         ]);
     }
 
     return pick([
-        'Hmm menarik. Cerita lebih lanjut dong',
-        'Aku dengerin kok, lanjutin',
-        'Terus gimana?',
-        'Cerita aja terus, aku ga kemana-mana',
-        'Oke, aku di sini. Mau ngobrol atau butuh fitur? ketik *menu*',
+        'Hmm interesting. Tell me more',
+        'I\'m listening. Go on',
+        'And then what happened?',
+        'I\'m here. Mau ngobrol or need help with something? ketik *menu*',
+        'Go on, I\'m not going anywhere',
     ]);
 }
 
