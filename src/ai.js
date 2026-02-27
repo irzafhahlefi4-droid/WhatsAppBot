@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { getChatHistory, appendChatHistory } = require('./database');
 
 // --- Config ---
 const ENV_PATH = path.join(__dirname, '..', '.env');
@@ -47,35 +48,6 @@ Cara kamu ngomong (SANGAT PENTING):
 Tone: cewek cerdas, temen diskusi yang asik, pacar yang loving & caring. The kind of girl who gives the best life advice over late night talks tanpa berasa kayak digurui.`;
 
 /**
- * In-memory chat sessions per user.
- * @type {Map<string, any>}
- */
-const chatSessions = new Map();
-
-/**
- * Get or create a chat session for a user.
- * @param {string} senderId
- * @returns {any} Gemini ChatSession
- */
-function getChatSession(senderId) {
-    if (!chatSessions.has(senderId)) {
-        // Use a fresh model instance with systemInstruction baked in
-        const chatModel = genAI.getGenerativeModel({
-            model: MODEL_NAME,
-            systemInstruction: SYSTEM_PROMPT,
-        });
-        const chat = chatModel.startChat({
-            generationConfig: {
-                maxOutputTokens: 300,
-                temperature: 0.85,
-            },
-        });
-        chatSessions.set(senderId, chat);
-    }
-    return chatSessions.get(senderId);
-}
-
-/**
  * Handle sending prompt with possible image parts to Gemini.
  * @param {string} senderId - User identifier
  * @param {string} text - User prompt
@@ -93,7 +65,7 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
         let reply = null;
 
         if (imageBuffer && mimetype) {
-            // Image + optional text — use one-off generateContent with system instruction
+            // Image + optional text — one-off generateContent (no history, images can't be stored)
             const imageModel = genAI.getGenerativeModel({
                 model: MODEL_NAME,
                 systemInstruction: SYSTEM_PROMPT,
@@ -109,11 +81,28 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
             const response = await result.response;
             reply = response.text().trim();
         } else {
-            // Normal text chat with persistent session
-            const chat = getChatSession(senderId);
+            // Text chat — load persisted history from DB
+            const history = getChatHistory(senderId);
+            const chatModel = genAI.getGenerativeModel({
+                model: MODEL_NAME,
+                systemInstruction: SYSTEM_PROMPT,
+            });
+            const chat = chatModel.startChat({
+                history,
+                generationConfig: {
+                    maxOutputTokens: 300,
+                    temperature: 0.85,
+                },
+            });
             const result = await chat.sendMessage(text);
             const response = await result.response;
             reply = response.text().trim();
+
+            // Persist the exchange so it survives restarts
+            if (reply) {
+                appendChatHistory(senderId, 'user', text);
+                appendChatHistory(senderId, 'model', reply);
+            }
         }
 
         console.log('[AI] Reply:', reply?.substring(0, 80));

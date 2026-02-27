@@ -26,6 +26,7 @@ function createUserData() {
   return {
     todo: [],
     pengeluaran: [],
+    chatHistory: [],
   };
 }
 
@@ -106,4 +107,34 @@ function getUserCount() {
   return Object.keys(fullDB.users).length;
 }
 
-module.exports = { loadDB, getUserData, saveDB, getUserCount };
+/**
+ * Get AI chat history for a user (max last N turns).
+ * @param {string} senderId
+ * @param {number} maxTurns
+ * @returns {Array<{role: string, parts: {text: string}[]}>}
+ */
+function getChatHistory(senderId, maxTurns = 20) {
+  const user = getUserData(senderId);
+  if (!user.chatHistory) user.chatHistory = [];
+  // Return last maxTurns entries (each turn = 1 message)
+  return user.chatHistory.slice(-maxTurns);
+}
+
+/**
+ * Append a message to AI chat history for a user and auto-save.
+ * @param {string} senderId
+ * @param {string} role - 'user' or 'model'
+ * @param {string} text
+ */
+function appendChatHistory(senderId, role, text) {
+  const user = getUserData(senderId);
+  if (!user.chatHistory) user.chatHistory = [];
+  user.chatHistory.push({ role, parts: [{ text }] });
+  // Keep last 40 messages max to avoid bloat
+  if (user.chatHistory.length > 40) {
+    user.chatHistory = user.chatHistory.slice(-40);
+  }
+  saveDB();
+}
+
+module.exports = { loadDB, getUserData, saveDB, getUserCount, getChatHistory, appendChatHistory };
