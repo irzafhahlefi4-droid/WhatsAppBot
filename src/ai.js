@@ -1,3 +1,9 @@
+/**
+ * AI Chat module — Hybrid approach:
+ * - Groq (llama-3.3-70b) for text chat: fast, natural, reliable
+ * - Gemini (gemini-2.5-flash) for image vision: only when image is sent
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -5,26 +11,33 @@ const { getChatHistory, appendChatHistory } = require('./database');
 
 // --- Config ---
 const ENV_PATH = path.join(__dirname, '..', '.env');
-let API_KEY = process.env.GEMINI_API_KEY || '';
 
-// Try loading from .env file if not in environment
-if (!API_KEY && fs.existsSync(ENV_PATH)) {
-    const envContent = fs.readFileSync(ENV_PATH, 'utf-8');
-    const match = envContent.match(/GEMINI_API_KEY=(.+)/);
-    if (match) API_KEY = match[1].trim();
+function loadEnvKey(keyName) {
+    let val = process.env[keyName] || '';
+    if (!val && fs.existsSync(ENV_PATH)) {
+        const content = fs.readFileSync(ENV_PATH, 'utf-8');
+        const match = content.match(new RegExp(`${keyName}=(.+)`));
+        if (match) val = match[1].trim();
+    }
+    return val;
 }
 
-const MODEL_NAME = 'gemini-2.5-flash';
-let genAI = null;
-let model = null;
+const GROQ_API_KEY = loadEnvKey('GROQ_API_KEY');
+const GEMINI_API_KEY = loadEnvKey('GEMINI_API_KEY');
 
-if (API_KEY) {
-    genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: MODEL_NAME });
+// Groq setup
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+// Gemini setup (vision only)
+const GEMINI_MODEL = 'gemini-2.5-flash';
+let genAI = null;
+if (GEMINI_API_KEY) {
+    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 }
 
 /**
- * System prompt that defines the bot's personality.
+ * System prompt — girlfriend persona.
  */
 const SYSTEM_PROMPT = `Kamu itu pacarnya. Bukan asisten, bukan bot. Kamu cewek beneran yang sayang dan care sama dia.
 
@@ -48,96 +61,118 @@ Cara kamu ngomong (SANGAT PENTING):
 Tone: cewek cerdas, temen diskusi yang asik, pacar yang loving & caring. The kind of girl who gives the best life advice over late night talks tanpa berasa kayak digurui.`;
 
 /**
- * Handle sending prompt with possible image parts to Gemini.
- * @param {string} senderId - User identifier
- * @param {string} text - User prompt
- * @param {Buffer} [imageBuffer] - Optional image buffer
- * @param {string} [mimetype] - Optional mimetype of image
+ * Text chat using Groq API (fast, reliable, persistent history via DB).
+ * @param {string} senderId
+ * @param {string} text
  * @returns {Promise<string|null>}
  */
-async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
-    if (!API_KEY || !model) {
-        console.error('[AI] API_KEY or model not initialized');
+async function chatWithGroq(senderId, text) {
+    if (!GROQ_API_KEY) return null;
+
+    // Load last 20 messages from DB for context
+    const dbHistory = getChatHistory(senderId, 20);
+    const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        // Convert Gemini-format history [{role, parts:[{text}]}] to OpenAI format
+        ...dbHistory.map(h => ({ role: h.role === 'model' ? 'assistant' : h.role, content: h.parts[0]?.text || '' })),
+        { role: 'user', content: text },
+    ];
+
+    const response = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            model: GROQ_MODEL,
+            messages,
+            max_tokens: 300,
+            temperature: 0.8,
+        }),
+    });
+
+    if (!response.ok) {
+        console.error(`[AI/Groq] Error: ${response.status} ${response.statusText}`);
         return null;
     }
 
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content?.trim();
+
+    if (reply) {
+        appendChatHistory(senderId, 'user', text);
+        appendChatHistory(senderId, 'model', reply);
+    }
+
+    return reply || null;
+}
+
+/**
+ * Vision using Gemini (only for images).
+ * @param {string} text - Caption or empty
+ * @param {Buffer} imageBuffer
+ * @param {string} mimetype
+ * @returns {Promise<string|null>}
+ */
+async function chatWithGeminiVision(text, imageBuffer, mimetype) {
+    if (!GEMINI_API_KEY || !genAI) return null;
+
+    const imageModel = genAI.getGenerativeModel({
+        model: GEMINI_MODEL,
+        systemInstruction: SYSTEM_PROMPT,
+    });
+
+    const imagePart = {
+        inlineData: {
+            data: imageBuffer.toString('base64'),
+            mimeType: mimetype,
+        },
+    };
+    const textPart = { text: text || 'Komentari gambar ini dong' };
+
+    const result = await imageModel.generateContent({
+        contents: [{ role: 'user', parts: [textPart, imagePart] }],
+        generationConfig: { maxOutputTokens: 500, temperature: 0.85 },
+    });
+
+    const response = await result.response;
+    return response.text().trim() || null;
+}
+
+/**
+ * Main entry point. Routes to Groq (text) or Gemini (image).
+ * @param {string} senderId
+ * @param {string} text
+ * @param {Buffer} [imageBuffer]
+ * @param {string} [mimetype]
+ * @returns {Promise<string|null>}
+ */
+async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
     try {
-        let reply = null;
-
         if (imageBuffer && mimetype) {
-            // Image + optional text — one-off generateContent (no history, images can't be stored)
-            const imageModel = genAI.getGenerativeModel({
-                model: MODEL_NAME,
-                systemInstruction: SYSTEM_PROMPT,
-            });
-            const imagePart = {
-                inlineData: {
-                    data: imageBuffer.toString('base64'),
-                    mimeType: mimetype,
-                },
-            };
-            const textPart = { text: text || 'Komentari gambar ini dong' };
-            const result = await imageModel.generateContent({
-                contents: [{ role: 'user', parts: [textPart, imagePart] }],
-                generationConfig: { maxOutputTokens: 800, temperature: 0.85 },
-            });
-            const response = await result.response;
-            reply = response.text().trim();
+            console.log('[AI] Vision request → Gemini');
+            const reply = await chatWithGeminiVision(text, imageBuffer, mimetype);
+            if (reply) console.log('[AI/Gemini] Reply:', reply.substring(0, 80));
+            return reply;
         } else {
-            // Text chat — load persisted history from DB (last 10 only to avoid quota issues)
-            const history = getChatHistory(senderId, 10);
-            const chatModel = genAI.getGenerativeModel({
-                model: MODEL_NAME,
-                systemInstruction: SYSTEM_PROMPT,
-            });
-            const chat = chatModel.startChat({
-                history,
-                generationConfig: {
-                    maxOutputTokens: 800,
-                    temperature: 0.85,
-                },
-            });
-
-            // Retry once on rate limit
-            let result;
-            try {
-                result = await chat.sendMessage(text);
-            } catch (rateErr) {
-                if (rateErr.message?.includes('429') || rateErr.message?.includes('quota') || rateErr.message?.includes('RetryInfo')) {
-                    console.log('[AI] Rate limit hit, waiting 8s then retrying...');
-                    await new Promise(res => setTimeout(res, 8000));
-                    result = await chat.sendMessage(text);
-                } else {
-                    throw rateErr;
-                }
-            }
-
-            const response = await result.response;
-            reply = response.text().trim();
-
-            // Persist the exchange so it survives restarts
-            if (reply) {
-                appendChatHistory(senderId, 'user', text);
-                appendChatHistory(senderId, 'model', reply);
-            }
+            console.log('[AI] Text request → Groq');
+            const reply = await chatWithGroq(senderId, text);
+            if (reply) console.log('[AI/Groq] Reply:', reply.substring(0, 80));
+            return reply;
         }
-
-        console.log('[AI] Reply:', reply?.substring(0, 80));
-        return reply || null;
     } catch (err) {
-        console.error('[AI] Gemini Request failed:', err.message);
-        console.error('[AI] Full error:', JSON.stringify(err?.errorDetails || err?.status || '-'));
+        console.error('[AI] Error:', err.message);
         return null;
     }
 }
 
 /**
- * Check if AI is available (API key is set).
+ * AI is available if at least Groq key is set.
  * @returns {boolean}
  */
 function isAIAvailable() {
-    return !!API_KEY;
+    return !!(GROQ_API_KEY || GEMINI_API_KEY);
 }
 
 module.exports = { chatWithAI, isAIAvailable };
-
