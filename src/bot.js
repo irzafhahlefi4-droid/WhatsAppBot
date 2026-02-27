@@ -12,7 +12,7 @@ const qrcode = require('qrcode-terminal');
 const path = require('path');
 const fs = require('fs');
 
-const { loadDB, getUserData, getUserCount } = require('./database');
+const { loadDB, getUserData, getUserCount, clearChatHistory } = require('./database');
 const { handleHalo, handleJam } = require('./commands/general');
 const { handleMenu } = require('./commands/menu');
 const { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo } = require('./commands/todo');
@@ -160,6 +160,12 @@ async function startBot() {
 
                 const command = routeCommand(text || '', userData);
 
+                // Special: reset chat history
+                if (text?.trim().toLowerCase() === 'reset chat') {
+                    clearChatHistory(sender);
+                    await sock.sendMessage(sender, { text: 'Oke, kita mulai fresh lagi ya' });
+                    continue;
+                }
                 if (command && text) {
                     if (typeof command === 'object' && command.type === 'export') {
                         await sendExport(sock, sender, command.handler, userData);

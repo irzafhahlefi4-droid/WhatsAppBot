@@ -137,4 +137,10 @@ function appendChatHistory(senderId, role, text) {
   saveDB();
 }
 
-module.exports = { loadDB, getUserData, saveDB, getUserCount, getChatHistory, appendChatHistory };
+function clearChatHistory(senderId) {
+  const user = getUserData(senderId);
+  user.chatHistory = [];
+  saveDB();
+}
+
+module.exports = { loadDB, getUserData, saveDB, getUserCount, getChatHistory, appendChatHistory, clearChatHistory };
