@@ -20,36 +20,36 @@ function handleHalo() {
 
     if (jam >= 4 && jam < 11) {
         return pick([
-            'Good morning, sayang. Have you had breakfast?',
-            'Morning, say! hope you slept well',
-            'Pagi! I\'ve been waiting for you to text hehe',
-            'Morning, ay. Don\'t forget to hydrate ya',
-            'Hai sayang, start your day right okay?',
+            'Morning sayang. Udah sarapan?',
+            'Morning say! hope u slept well',
+            'Pagi! I\'ve been waiting for u to text hehe',
+            'Morning ay. Don\'t forget to hydrate ya',
+            'Hai sayang, start ur day right ok?',
         ]);
     } else if (jam >= 11 && jam < 15) {
         return pick([
-            'Hey sayang, have you eaten yet?',
-            'Hai say! don\'t forget to take a break',
-            'Lagi sibuk ya? make sure you eat, okay?',
-            'Hey ay, how\'s your day so far?',
-            'Hai sayang, don\'t overwork yourself',
+            'Hey sayang, have u eaten yet?',
+            'Hai say! don\'t forget to take a break tbh',
+            'Lagi sibuk ya? make sure u eat ok?',
+            'Hey ay, how\'s ur day so far?',
+            'Hai sayang, don\'t overwork urself ya',
         ]);
     } else if (jam >= 15 && jam < 18) {
         return pick([
-            'Hey sayang, how was your day?',
-            'Hai say! tell me about your day',
-            'Sore, sayang. You doing okay?',
-            'Hey ay, I was thinking about you',
+            'Hey sayang, how was ur day?',
+            'Hai say! tell me about ur day',
+            'Sore sayang. U doing ok?',
+            'Hey ay, lagi mikirin kamu hm',
             'Hai sayang, almost evening. How\'s everything?',
         ]);
     } else {
         return pick([
-            'Hey sayang, don\'t stay up too late okay?',
-            'Hai say! have you had dinner?',
-            'You\'re still up hm? I appreciate the company',
-            'Hey ay, how was your day? tell me',
-            'Night, sayang. Take care of yourself',
-            'Hai say, I\'m always here whenever you need me',
+            'Hey sayang, don\'t stay up too late ok?',
+            'Hai say! have u had dinner?',
+            'U still up hm? I appreciate the company',
+            'Hey ay, how was ur day? tell me',
+            'Night sayang. Take care of urself',
+            'Hai say, I\'m always here whenever u need me tbh',
         ]);
     }
 }
