@@ -37,6 +37,12 @@ How you write:
 
 You're mature, a bit introspective, sometimes dry-humored. The kind of person who gives real perspective without making it a lecture.`;
 
+function cleanReply(text) {
+    if (!text) return text;
+    // Strip ellipsis — model tends to overuse it
+    return text.replace(/\.{2,}/g, '').trim();
+}
+
 async function textChat(senderId, message) {
     if (!GROQ_KEY) return null;
 
@@ -74,7 +80,7 @@ async function textChat(senderId, message) {
     if (!res.ok) return null;
 
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
+    const reply = cleanReply(data.choices?.[0]?.message?.content?.trim());
 
     if (reply) {
         appendChatHistory(senderId, 'user', message);
