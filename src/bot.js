@@ -283,11 +283,12 @@ async function startBot() {
                 if (msg.key.fromMe) continue;
                 if (msg.key.remoteJid === 'status@broadcast') continue;
 
-                const text = extractMessageText(msg.message);
-                if (!text) continue;
+                const isMedia = msg.message?.imageMessage || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
+                let text = extractMessageText(msg.message);
 
-                const sender = msg.key.remoteJid;
-                const pushName = msg.pushName || 'Unknown';
+                if (text === null && !isMedia) continue;
+                if (!text && isMedia) text = ''; // Ensure text handles empty captions
+
 
                 // Get user-specific data for this sender
                 const userData = getUserData(sender);
