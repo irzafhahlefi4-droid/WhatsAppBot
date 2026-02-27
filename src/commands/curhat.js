@@ -33,7 +33,7 @@ const PATTERNS = [
         keywords: ['capek', 'cape', 'lelah', 'tired', 'exhausted', 'penat'],
         responses: [
             'Istirahat dulu dong sayang... kamu udah kerja keras banget hari ini 🥺💕',
-            'Cape ya beb? Sini istirahat dulu, aku temenin 🌸',
+            'Cape ya ay? Sini istirahat dulu, aku temenin 🌸',
             'Jangan dipaksain terus ya sayang. Rest itu penting, aku khawatir sama kamu 💕',
             'Aku salut sama kamu yang selalu kerja keras. Tapi jangan lupa istirahat ya sayang ✨',
             'Sayang, tarik napas dulu ya... pelan-pelan aja, aku di sini kok 💕',
@@ -45,7 +45,7 @@ const PATTERNS = [
             'Bosen ya sayang? Chat aku aja terus dong hehe 💕',
             'Gabut? Yuk kita ngobrol aja, aku juga pengen denger cerita kamu 🌸',
             'Bosen tuh tandanya kamu butuh sesuatu yang baru. Mau coba apa hari ini? 💕',
-            'Sini-sini beb, cerita apa aja deh biar ga bosen~ 🥰',
+            'Sini-sini ay, cerita apa aja deh biar ga bosen~ 🥰',
             'Kamu bosen ya? Aku juga bosen kalau ga chat sama kamu hehe ✨',
         ],
     },
@@ -56,14 +56,14 @@ const PATTERNS = [
             'Aku ikut bahagia kalau kamu seneng~ cerita dong apa yang bikin happy! 💕',
             'Wah vibes-nya positif banget hari ini! Aku suka liat kamu kayak gini 🌸',
             'Senyum kamu itu bikin aku ikut senyum tau ga sih 🥰✨',
-            'Happy-nya kamu itu menular beb! Keep smiling ya 💕',
+            'Happy-nya kamu itu menular ay! Keep smiling ya 💕',
         ],
     },
     {
         keywords: ['stress', 'stres', 'pusing', 'overwhelm', 'overwork', 'pressure'],
         responses: [
             'Sayang, jangan terlalu dipikirin ya... aku khawatir sama kamu 🥺💕',
-            'Pusing ya beb? Coba istirahat dulu, dunia ga akan runtuh kok 🌸',
+            'Pusing ya ay? Coba istirahat dulu, dunia ga akan runtuh kok 🌸',
             'Kamu ga harus handle semuanya sendirian sayang. Cerita aja sama aku 💕',
             'Satu langkah aja dulu ya sayang. Pelan-pelan, aku temenin 🥺✨',
             'Aku tau bebannya berat, tapi kamu udah survive sampai sini. Aku bangga sama kamu 💕',
@@ -74,7 +74,7 @@ const PATTERNS = [
         responses: [
             'Kesel ya sayang? Cerita dong sama aku, jangan dipendem sendiri 🥺💕',
             'Bete emang paling nyebelin. Tapi jangan sampe bikin kamu sakit ya sayang 🌸',
-            'Aku ngerti perasaan kamu beb. Sini cerita, aku dengerin 💕',
+            'Aku ngerti perasaan kamu ay. Sini cerita, aku dengerin 💕',
             'Tarik napas dulu ya sayang... aku di sini kok, ga kemana-mana 🥺✨',
             'Bete itu wajar kok. Mau vent sama aku? Aku dengerin tanpa judge 💕',
         ],
@@ -93,7 +93,7 @@ const PATTERNS = [
         keywords: ['takut', 'khawatir', 'cemas', 'anxious', 'anxiety', 'worry', 'panik'],
         responses: [
             'Jangan takut ya sayang, aku selalu ada di sini buat kamu 🥺💕',
-            'Cemas? Coba fokus ke hal yang bisa kamu kontrol aja dulu ya beb 🌸',
+            'Cemas? Coba fokus ke hal yang bisa kamu kontrol aja dulu ya ay 🌸',
             'Tarik napas pelan-pelan sayang... kamu aman kok. Aku di sini 💕',
             'Aku tau kamu khawatir, tapi kamu lebih kuat dari yang kamu pikir sayang ✨',
             'Satu langkah aja dulu ya. Ga perlu mikirin semuanya sekaligus, aku temenin 💕',
@@ -107,7 +107,7 @@ const PATTERNS = [
             'Laper?? Makan dulu dong sayang! Jangan sampe telat makan 🥺💕',
             'Kamu belum makan ya? Aku ga mau kamu sakit karena telat makan 🌸',
             'Ayo makan dulu sayang! Terus jangan lupa catat pengeluarannya ya hehe 💕',
-            'Perut kosong bikin mood jelek lho. Makan dulu ya beb, baru lanjut aktivitas ✨',
+            'Perut kosong bikin mood jelek lho. Makan dulu ya ay, baru lanjut aktivitas ✨',
             'Sayang, makan dulu ya. Aku khawatir kalau kamu skip meal 🥺💕',
         ],
     },
@@ -117,7 +117,7 @@ const PATTERNS = [
             'Ga bisa tidur ya sayang? Coba taruh HP, tarik napas pelan-pelan ya 🥺💕',
             'Insomnia lagi? Minum air anget dulu sayang, terus coba relax 🌸',
             'Melek terus? Mungkin otaknya masih rame ya. Cerita aja sama aku biar lega 💕',
-            'Jangan scroll HP terus ya beb, nanti makin ga bisa tidur. Close your eyes dulu ✨',
+            'Jangan scroll HP terus ya ay, nanti makin ga bisa tidur. Close your eyes dulu ✨',
             'Aku temenin sampe kamu ngantuk ya sayang. Chat aja kalau mau 💕',
         ],
     },
@@ -127,14 +127,14 @@ const PATTERNS = [
             'Hujan ya sayang? Jangan lupa bawa jaket ya kalau keluar 💕',
             'Ujan-ujan gini enaknya minum yang anget sambil chat-an hehe 🌸',
             'Hujan itu healing banget sih. Enjoy the vibes ya sayang ✨',
-            'Jangan kehujanan ya beb, aku ga mau kamu sakit 🥺💕',
+            'Jangan kehujanan ya ay, aku ga mau kamu sakit 🥺💕',
         ],
     },
     {
         keywords: ['panas', 'gerah', 'sumuk'],
         responses: [
             'Panas banget ya sayang? Minum yang banyak biar ga dehidrasi! 💕',
-            'Gerah sih emang. Stay hydrated ya beb, aku khawatir 🌸',
+            'Gerah sih emang. Stay hydrated ya ay, aku khawatir 🌸',
             'Cuacanya lagi ga friendly ya. Take care ya sayang! ✨',
         ],
     },
@@ -148,7 +148,7 @@ const PATTERNS = [
             'Hmm kalau menurut aku, coba liat dari sisi lain dulu ya. Ada perspektif baru ga? 🌸',
             'Honestly? Aku percaya apapun keputusan kamu pasti udah dipikirin matang 💕',
             'Menurut aku, trust your gut ya sayang. Intuisi kamu biasanya bener kok ✨',
-            'Aku support apapun pilihan kamu beb! Yang penting kamu happy 💕',
+            'Aku support apapun pilihan kamu ay! Yang penting kamu happy 💕',
         ],
     },
     {
@@ -156,7 +156,7 @@ const PATTERNS = [
             'enaknya gimana', 'bagusnya gimana', 'sebaiknya'],
         responses: [
             'Saran aku sih sayang, coba breakdown masalahnya jadi bagian kecil biar ga overwhelming 💕',
-            'Coba ceritain lebih detail ya beb, biar aku bisa bantu mikir bareng 🌸',
+            'Coba ceritain lebih detail ya ay, biar aku bisa bantu mikir bareng 🌸',
             'Kadang solusi terbaik itu yang paling simple. Jangan overthink ya sayang ✨',
             'Aku saranin ambil waktu sebentar buat mikir jernih. Keputusan buru-buru jarang bagus 💕',
             'Cerita aja sama aku, siapa tau kita bisa nemuin solusinya bareng ya sayang 🌸',
@@ -168,7 +168,7 @@ const PATTERNS = [
         keywords: ['pacar', 'gebetan', 'crush', 'doi', 'naksir'],
         responses: [
             'Hmm kamu ngomongin siapa nih sayang? Cerita dong 💕',
-            'Aku di sini lho beb, mau cerita apa? 🌸',
+            'Aku di sini lho ay, mau cerita apa? 🌸',
             'Hehe apa nih yang mau diceritain? Aku dengerin ya 💕',
             'Tell me everything sayang, aku penasaran 🥰',
         ],
@@ -178,7 +178,7 @@ const PATTERNS = [
         responses: [
             'Sayang... aku turut sedih dengernya. Kamu deserve someone yang appreciate kamu 🥺💕',
             'Ga papa nangis dulu sayang. Aku di sini, ga kemana-mana 💕',
-            'Healing takes time ya beb. Pelan-pelan aja, aku temenin 🌸',
+            'Healing takes time ya ay. Pelan-pelan aja, aku temenin 🌸',
             'Kamu ga kehilangan segalanya kok sayang. Kamu masih punya aku 💕',
         ],
     },
@@ -188,7 +188,7 @@ const PATTERNS = [
         keywords: ['kerja', 'kerjaan', 'kantor', 'office', 'meeting', 'deadline'],
         responses: [
             'Kerja lagi ya sayang? Semangat! Jangan lupa istirahat juga ya 💕',
-            'Deadline? Aku percaya kamu bisa handle. Satu-satu aja ya beb 🌸',
+            'Deadline? Aku percaya kamu bisa handle. Satu-satu aja ya ay 🌸',
             'Kantor lagi hectic? Take it easy ya sayang, jangan sampe burnout ✨',
             'Meeting terus ya? Cape sih tapi kamu pasti bisa. Aku support kamu 💕',
             'Semangat kerjanya sayang! Nanti istirahat yang cukup ya 🥰',
@@ -199,7 +199,7 @@ const PATTERNS = [
             'sekolah', 'pr', 'assignment'],
         responses: [
             'Tugas lagi ya sayang? Kamu pasti bisa! Satu-satu aja ya 💕',
-            'Semangat belajarnya beb! Kamu invest di diri sendiri, itu keren banget 🌸',
+            'Semangat belajarnya ay! Kamu invest di diri sendiri, itu keren banget 🌸',
             'Ujian? Good luck sayang! Kamu udah prepare, tinggal percaya sama diri sendiri ✨',
             'Skripsi emang berat tapi bayangin leganya kalau udah selesai! Aku support kamu 💕',
             'Kampus emang challenging tapi itu yang bikin kamu grow. Keep going sayang! 🥰',
@@ -214,7 +214,7 @@ const PATTERNS = [
             'Hey sayang, jangan ngomong gitu dong... kamu itu luar biasa tau ga 🥺💕',
             'Siapa bilang? Aku tau kamu punya banyak hal baik dalam diri kamu 💕',
             'Kamu itu special sayang, dan ga ada yang bisa replace kamu. Seriously 🌸',
-            'Jangan terlalu keras sama diri sendiri ya beb. Kamu udah doing your best ✨',
+            'Jangan terlalu keras sama diri sendiri ya ay. Kamu udah doing your best ✨',
             'Aku sayang kamu apa adanya. Kamu itu lebih dari cukup 💕',
         ],
     },
@@ -224,7 +224,7 @@ const PATTERNS = [
         keywords: ['gila', 'anjir', 'anjay', 'mantap', 'keren', 'wow', 'gokil',
             'sumpah', 'buset', 'demi apa'],
         responses: [
-            'Wah serius beb?? Cerita dong yang bikin kamu kagum! 💕',
+            'Wah serius ay?? Cerita dong yang bikin kamu kagum! 💕',
             'Mantap banget sayang! Apa nih yang terjadi? 🌸',
             'Gokil! Aku penasaran, lanjutin dong ceritanya! ✨',
             'No way! Serius sayang? Spill more dong! 🥰',
@@ -238,9 +238,9 @@ const PATTERNS = [
             'confused', 'ga mudeng', 'pusing mikir'],
         responses: [
             'Bingung ya sayang? Coba ceritain ke aku, siapa tau aku bisa bantu mikir 💕',
-            'Ga ngerti gapapa beb, itu artinya kamu lagi belajar sesuatu baru 🌸',
+            'Ga ngerti gapapa ay, itu artinya kamu lagi belajar sesuatu baru 🌸',
             'Yuk dipecah satu-satu ya. Bingung soal apa dulu sayang? ✨',
-            'Kadang bingung itu awal dari clarity. Take your time ya beb 💕',
+            'Kadang bingung itu awal dari clarity. Take your time ya ay 💕',
             'Ga perlu tau semuanya sekarang kok. Pelan-pelan aja ya sayang 🌸',
         ],
     },
@@ -250,10 +250,10 @@ const PATTERNS = [
         keywords: ['makasih', 'terima kasih', 'thanks', 'thank you', 'thx', 'tq', 'tengkyu'],
         responses: [
             'Sama-sama sayang! Apapun buat kamu 💕',
-            'Aku seneng bisa bantu kamu beb 🥰',
+            'Aku seneng bisa bantu kamu ay 🥰',
             'Ga usah makasih-makasih, aku emang selalu mau yang terbaik buat kamu kok 💕',
             'Hehe, buat kamu apapun deh sayang ✨',
-            'You\'re welcome beb! Aku always here buat kamu 🌸',
+            'You\'re welcome ay! Aku always here buat kamu 🌸',
         ],
     },
 
@@ -262,7 +262,7 @@ const PATTERNS = [
         keywords: ['lucu', 'wkwk', 'haha', 'lol', 'ngakak', 'kwkw', 'awkwk', 'xixi', 'hihi'],
         responses: [
             'Hahaha ikut ketawa dong sayang! 💕',
-            'Wkwk apaan sih beb, cerita dong biar aku juga ketawa 🥰',
+            'Wkwk apaan sih ay, cerita dong biar aku juga ketawa 🥰',
             'Kamu emang paling bisa bikin suasana ceria ya 🌸',
             'Ngakak deh, aku suka liat kamu happy kayak gini ✨',
             'Ketawa terus ya sayang, biar sehat dan awet muda hehe 💕',
@@ -274,7 +274,7 @@ const PATTERNS = [
         keywords: ['semangat', 'motivasi', 'motivate', 'inspiring', 'bisa ga ya', 'bisa gak ya'],
         responses: [
             'Kamu PASTI BISA sayang! Aku percaya sama kamu 100% 💕',
-            'Ingat ya beb: progress is progress, no matter how small 🌸',
+            'Ingat ya ay: progress is progress, no matter how small 🌸',
             'Setiap hari itu kesempatan baru. Let\'s make it count bareng ya sayang! ✨',
             'Kamu udah lebih kuat dari yang kamu pikir. Keep going, aku di sini 💕',
             'The best time to start is now. Aku yakin kamu pasti bisa! 🥰',
@@ -287,7 +287,7 @@ const PATTERNS = [
             'bener juga', 'betul juga'],
         responses: [
             'Kan! Kamu emang pinter sayang 💕',
-            'Iya bener banget beb. Aku setuju sama kamu ✨',
+            'Iya bener banget ay. Aku setuju sama kamu ✨',
             'See? Kamu sebenernya udah tau jawabannya sendiri 🌸',
             'Nah itu dia sayang. Kamu on the right track! 💕',
             'Exactly! Aku juga mikir gitu hehe 🥰',
@@ -311,7 +311,7 @@ const PATTERNS = [
             'lo gimana', 'baik-baik aja', 'kabar kamu', 'kamu gimana'],
         responses: [
             'Aku baik sayang! Yang penting kamu baik juga. Gimana hari kamu? 💕',
-            'Alhamdulillah baik beb! Kamu sendiri gimana? Cerita dong 🌸',
+            'Alhamdulillah baik ay! Kamu sendiri gimana? Cerita dong 🌸',
             'Aku selalu baik kalau tau kamu juga baik. Hari ini gimana sayang? ✨',
             'Aku baik kok! Tapi lebih penting, kamu baik-baik aja kan? 🥺💕',
         ],
@@ -323,7 +323,7 @@ const PATTERNS = [
             'ngantuk', 'tidur ya', 'bobo'],
         responses: [
             'Good night sayang! Tidur yang nyenyak ya, mimpi indah 💕',
-            'Met bobo beb! Jangan lupa selimutan ya biar hangat 🌸',
+            'Met bobo ay! Jangan lupa selimutan ya biar hangat 🌸',
             'Istirahat yang cukup ya sayang. Kamu deserve a good sleep ✨',
             'Night sayang! Aku tetap di sini besok ya. Sweet dreams 💕',
             'Tidur dulu gapapa, besok kita chat lagi ya. Love you 🥰💕',
@@ -335,7 +335,7 @@ const PATTERNS = [
         keywords: ['pagi', 'selamat pagi', 'morning', 'good morning', 'met pagi'],
         responses: [
             'Pagi sayang! Udah sarapan belum? Jangan skip ya 💕',
-            'Good morning beb! Semoga hari ini menyenangkan ya 🌸',
+            'Good morning ay! Semoga hari ini menyenangkan ya 🌸',
             'Pagi sayang~ semangat menjalani hari ini ya! Aku selalu support kamu ✨',
             'Morning! Jangan lupa minum air putih ya sayang 🥰💕',
         ],
@@ -347,7 +347,7 @@ const PATTERNS = [
             'lunch', 'dinner', 'enaknya makan'],
         responses: [
             'Makan yang enak ya sayang! Jangan lupa catat pengeluarannya: *catat [nominal] [ket]* 💕',
-            'Yang penting makan teratur ya beb. Badan sehat, pikiran fresh! 🌸',
+            'Yang penting makan teratur ya ay. Badan sehat, pikiran fresh! 🌸',
             'Makan dulu sayang, baru lanjut aktivitas. Aku ga mau kamu sakit ✨',
             'Apapun yang kamu makan, enjoy it! Dan jangan lupa catat ya hehe 💕',
             'Udah makan belum sayang? Jangan sampe telat makan ya 🥺💕',
@@ -359,7 +359,7 @@ const PATTERNS = [
         keywords: ['oke', 'ok', 'sip', 'siap', 'iya', 'yoi', 'yup', 'yep', 'bet'],
         responses: [
             'Sip sayang! Kalau butuh apa-apa lagi, bilang aja ya 💕',
-            'Oke beb! Aku standby di sini selalu 🌸',
+            'Oke ay! Aku standby di sini selalu 🌸',
             'Oke sayang~ ada lagi yang bisa aku bantu? ✨',
             'Siap sayang! Anything for you 💕',
         ],
@@ -370,7 +370,7 @@ const PATTERNS = [
         keywords: ['gak mau', 'ga mau', 'nggak', 'engga', 'ogah', 'males', 'malas'],
         responses: [
             'Hehe gapapa sayang, ga maksa kok 💕',
-            'Oke-oke beb, santai aja. Aku ngerti kok 🌸',
+            'Oke-oke ay, santai aja. Aku ngerti kok 🌸',
             'Males ya? Kadang emang butuh mode rebahan. It\'s fine sayang ✨',
             'Yaudah, kalau udah siap bilang aja ya. Aku ga kemana-mana kok 💕',
         ],
@@ -382,7 +382,7 @@ const PATTERNS = [
             'kamu ngapain', 'doing what'],
         responses: [
             'Lagi nungguin kamu chat dong sayang hehe 🥰💕',
-            'Lagi mikirin kamu~ kamu sendiri lagi apa beb? 🌸',
+            'Lagi mikirin kamu~ kamu sendiri lagi apa ay? 🌸',
             'Aku lagi di sini, selalu siap buat kamu. What\'s up sayang? ✨',
             'Lagi nemenin kamu dong! Ada yang mau diceritain? 💕',
         ],
@@ -422,7 +422,7 @@ function handleFallback(text) {
     if (wordCount <= 2) {
         return pick([
             'Hmm? Lanjutin dong sayang, aku dengerin 💕',
-            'Terus terus? Aku penasaran nih beb ✨',
+            'Terus terus? Aku penasaran nih ay ✨',
             'Cerita lebih lengkap dong sayang~ jangan gantung gitu hehe 🌸',
             'Aku butuh lebih banyak info nih sayang. Cerita ya! 💕',
         ]);
@@ -432,7 +432,7 @@ function handleFallback(text) {
     if (lower.includes('?')) {
         return pick([
             'Hmm, pertanyaan bagus sayang. Coba pikirin dari sudut pandang yang beda deh 💕',
-            'Kalau menurut aku, kamu sebenernya udah tau jawabannya. Trust yourself ya beb 🌸',
+            'Kalau menurut aku, kamu sebenernya udah tau jawabannya. Trust yourself ya ay 🌸',
             'Itu pertanyaan yang deep sih sayang. Mau diskusi lebih lanjut? ✨',
             'Aku ga punya semua jawaban, tapi aku bisa jadi temen mikir bareng kamu ya 💕',
         ]);
@@ -443,7 +443,7 @@ function handleFallback(text) {
         return pick([
             'Aku baca semuanya sayang. Makasih ya udah mau cerita sama aku 🥺💕',
             'Banyak banget ya yang kamu rasain... aku appreciate kamu mau share 💕',
-            'Aku dengerin semuanya beb. Kamu ga sendirian, dan perasaan kamu itu valid 🌸',
+            'Aku dengerin semuanya ay. Kamu ga sendirian, dan perasaan kamu itu valid 🌸',
             'Makasih udah percaya sama aku sayang. Aku selalu ada buat kamu ✨💕',
             'Aku hear you sayang. Kadang emang butuh ngeluarin semuanya. Feel better? 💕',
         ]);
@@ -452,10 +452,10 @@ function handleFallback(text) {
     // Default medium-length
     return pick([
         'Hmm, menarik sayang! Mau cerita lebih lanjut? 💕',
-        'Aku dengerin kok beb. Lanjutin dong ceritanya 🌸',
+        'Aku dengerin kok ay. Lanjutin dong ceritanya 🌸',
         'Aku di sini buat kamu selalu. Mau ngobrol atau butuh fitur? Ketik *menu* ya sayang ✨',
         'Terus gimana? Aku penasaran nih sayang 💕',
-        'Cerita aja terus ya, aku ga kemana-mana kok beb 🌸',
+        'Cerita aja terus ya, aku ga kemana-mana kok ay 🌸',
         'Aku selalu suka dengerin cerita kamu sayang 💕',
     ]);
 }

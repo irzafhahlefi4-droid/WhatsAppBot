@@ -71,7 +71,7 @@ const MSG_CATAT_OK = [
     'Udah aku simpen ya, sayang ✨',
     'Catet! Kamu makin rapi nih ngatur keuangan 💕',
     'Tercatat~ semangat terus ya sayangku! 🌸',
-    'Oke beb, noted! 📝💕',
+    'Oke ay, noted! 📝💕',
     'Udah masuk ya sayang, good job! ✨',
 ];
 
@@ -90,58 +90,58 @@ const MSG_CATAT_OVER = [
     'Beb... ini udah *over budget* hari ini 😢 Aku tau kadang emang perlu, tapi besok kita hemat bareng ya? aku temenin 💕',
     'Hmm sayang, ini udah *melewati batas harian* lho... ga papa, tapi yuk besok kita lebih hati-hati ya 🥺💕',
     'Tercatat... tapi sayang, *batas hariannya udah kelewat* nih 🥺 Aku sayangnya kamu jadi pengen kamu lebih hemat, buat masa depan kita~ 💕',
-    'Aku catet ya... tapi beb, hari ini *udah over limit* 😢 Ga papa sekali-kali, tapi jangan keseringan ya sayang~ 🌸',
+    'Aku catet ya... tapi ay, hari ini *udah over limit* 😢 Ga papa sekali-kali, tapi jangan keseringan ya sayang~ 🌸',
 ];
 
 /** Pesan untuk total/rekap */
 const MSG_TOTAL_GOOD = [
     'Ini rekap pengeluaranmu sayang~ kamu hebat ngatur uangnya! 💕',
     'Aku udah rangkumin buat kamu, sayang ✨ Keuanganmu masih aman nih~',
-    'Ini rekapnya ya beb~ pengeluaranmu masih oke, aku bangga sama kamu 🥰',
+    'Ini rekapnya ya ay~ pengeluaranmu masih oke, aku bangga sama kamu 🥰',
 ];
 
 const MSG_TOTAL_WARN = [
     'Ini rekapnya sayang... pengeluaran hari ini udah lumayan banyak, hati-hati ya 🥺💕',
-    'Aku rangkumin ya beb~ tapi aku perhatiin hari ini agak boros lho... pelan-pelan ya 🌸',
+    'Aku rangkumin ya ay~ tapi aku perhatiin hari ini agak boros lho... pelan-pelan ya 🌸',
 ];
 
 const MSG_TOTAL_OVER = [
     'Sayang... ini rekapnya. Hari ini udah *melebihi batas* 🥺 Besok kita hemat bareng ya? 💕',
-    'Ini rekapnya beb... aku perhatiin *udah lewat batas harian* nih 😢 Tapi ga papa, besok kita improve bareng ya~ 💕',
+    'Ini rekapnya ay... aku perhatiin *udah lewat batas harian* nih 😢 Tapi ga papa, besok kita improve bareng ya~ 💕',
 ];
 
 /** Pesan kosong */
 const MSG_EMPTY = [
     'Belum ada pengeluaran yang dicatat sayang~ Rajin banget sih belum belanja 🥰',
-    'Belum ada catatan nih beb, kamu hemat banget ya hari ini 💕',
+    'Belum ada catatan nih ay, kamu hemat banget ya hari ini 💕',
     'Masih kosong sayang~ gunakan *catat [nominal] [keterangan]* ya kalau ada pengeluaran 🌸',
 ];
 
 /** Pesan hapus */
 const MSG_HAPUS = [
     'Udah aku hapus ya sayang~ 💕',
-    'Done, udah dihapus beb! ✨',
+    'Done, udah dihapus ay! ✨',
     'Oke sayang, yang ini udah aku buang dari catatan ya 🌸',
 ];
 
 /** Pesan edit */
 const MSG_EDIT = [
     'Udah aku perbaiki ya sayang~ 💕',
-    'Done beb, udah di-update! ✨',
+    'Done ay, udah di-update! ✨',
     'Oke sayang, catatannya udah aku ganti ya 🌸',
 ];
 
 /** Pesan batas diset */
 const MSG_BATAS_SET = [
     'Oke sayang, batas harian kamu aku set ya~ aku bakal jagain kamu biar ga boros 💕',
-    'Siap beb! Aku bakal ingetin kamu kalau udah mendekati batas ya 🥰',
+    'Siap ay! Aku bakal ingetin kamu kalau udah mendekati batas ya 🥰',
     'Tercatat~ tenang, aku bakal selalu perhatiin pengeluaranmu sayang 🌸',
 ];
 
 /** Pesan batas dihapus */
 const MSG_BATAS_OFF = [
     'Oke sayang, batas hariannya aku matikan ya~ tapi tetap hemat lho! 💕',
-    'Baik beb, aku ga batasi lagi deh. Tapi tetap bijak ya belanjanya 🌸',
+    'Baik ay, aku ga batasi lagi deh. Tapi tetap bijak ya belanjanya 🌸',
 ];
 
 // Default daily limit (100,000 IDR), user can override
