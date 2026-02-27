@@ -84,8 +84,8 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
             const response = await result.response;
             reply = response.text().trim();
         } else {
-            // Text chat — load persisted history from DB
-            const history = getChatHistory(senderId);
+            // Text chat — load persisted history from DB (last 10 only to avoid quota issues)
+            const history = getChatHistory(senderId, 10);
             const chatModel = genAI.getGenerativeModel({
                 model: MODEL_NAME,
                 systemInstruction: SYSTEM_PROMPT,
@@ -97,7 +97,21 @@ async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
                     temperature: 0.85,
                 },
             });
-            const result = await chat.sendMessage(text);
+
+            // Retry once on rate limit
+            let result;
+            try {
+                result = await chat.sendMessage(text);
+            } catch (rateErr) {
+                if (rateErr.message?.includes('429') || rateErr.message?.includes('quota') || rateErr.message?.includes('RetryInfo')) {
+                    console.log('[AI] Rate limit hit, waiting 8s then retrying...');
+                    await new Promise(res => setTimeout(res, 8000));
+                    result = await chat.sendMessage(text);
+                } else {
+                    throw rateErr;
+                }
+            }
+
             const response = await result.response;
             reply = response.text().trim();
 
