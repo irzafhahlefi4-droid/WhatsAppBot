@@ -47,7 +47,7 @@ console.log('========================================\n');
 loadDB();
 console.log('[BOT] Database loaded.');
 console.log(`[BOT] Total user: ${getUserCount()}`);
-console.log(`[BOT] AI Chat: ${isAIAvailable() ? 'Aktif (Groq)' : 'Nonaktif — set GROQ_API_KEY di .env'}`);
+console.log(`[BOT] AI Chat: ${isAIAvailable() ? 'Aktif (Gemini)' : 'Nonaktif — set GEMINI_API_KEY di .env'}`);
 
 // --- Start Admin Panel ---
 startAdmin();

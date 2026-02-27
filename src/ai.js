@@ -13,7 +13,7 @@ if (!API_KEY && fs.existsSync(ENV_PATH)) {
     if (match) API_KEY = match[1].trim();
 }
 
-const MODEL_NAME = 'gemini-1.5-flash';
+const MODEL_NAME = 'gemini-2.0-flash';
 let genAI = null;
 let model = null;
 
