@@ -47,7 +47,7 @@ Cara kamu ngomong (SANGAT PENTING):
 Tone: cewek cerdas, temen diskusi yang asik, pacar yang loving & caring. The kind of girl who gives the best life advice over late night talks tanpa berasa kayak digurui.`;
 
 /**
- * In-memory chat sessions per user to maintain history natively using Gemini's ChatSession.
+ * In-memory chat sessions per user.
  * @type {Map<string, any>}
  */
 const chatSessions = new Map();
@@ -59,20 +59,15 @@ const chatSessions = new Map();
  */
 function getChatSession(senderId) {
     if (!chatSessions.has(senderId)) {
-        const chat = model.startChat({
-            history: [
-                {
-                    role: "user",
-                    parts: [{ text: "Ini adalah pengingat penting untuk sistem: " + SYSTEM_PROMPT }],
-                },
-                {
-                    role: "model",
-                    parts: [{ text: "Oke sip, aku akan bertingkah persis seperti cewek yang ada di deskripsi itu. Aku ga akan pernah pake bahasa kaku atau ngaku sebagai AI." }],
-                }
-            ],
+        // Use a fresh model instance with systemInstruction baked in
+        const chatModel = genAI.getGenerativeModel({
+            model: MODEL_NAME,
+            systemInstruction: SYSTEM_PROMPT,
+        });
+        const chat = chatModel.startChat({
             generationConfig: {
-                maxOutputTokens: 250,
-                temperature: 0.8,
+                maxOutputTokens: 300,
+                temperature: 0.85,
             },
         });
         chatSessions.set(senderId, chat);
@@ -83,43 +78,49 @@ function getChatSession(senderId) {
 /**
  * Handle sending prompt with possible image parts to Gemini.
  * @param {string} senderId - User identifier
- * @param {string} text - User prompt 
+ * @param {string} text - User prompt
  * @param {Buffer} [imageBuffer] - Optional image buffer
  * @param {string} [mimetype] - Optional mimetype of image
  * @returns {Promise<string|null>}
  */
 async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
-    if (!API_KEY || !model) return null;
+    if (!API_KEY || !model) {
+        console.error('[AI] API_KEY or model not initialized');
+        return null;
+    }
 
     try {
         let reply = null;
 
-        // If it has an image, we don't use the persistent chat session history directly 
-        // to avoid Gemini rejecting complex multimodal history limits, instead we do a one-off generateContent
-        // passing the system prompt explicitly.
         if (imageBuffer && mimetype) {
-            const prompt = `Ingat system prompt persona kamu: ${SYSTEM_PROMPT}\n\nUser ngirim gambar beserta teks ini: ${text || "[Tidak ada teks tambahan]"}`;
+            // Image + optional text — use one-off generateContent with system instruction
+            const imageModel = genAI.getGenerativeModel({
+                model: MODEL_NAME,
+                systemInstruction: SYSTEM_PROMPT,
+            });
             const imagePart = {
                 inlineData: {
-                    data: imageBuffer.toString("base64"),
-                    mimeType: mimetype
-                }
+                    data: imageBuffer.toString('base64'),
+                    mimeType: mimetype,
+                },
             };
-
-            const result = await model.generateContent([prompt, imagePart]);
+            const textPart = { text: text || 'Komentari gambar ini dong' };
+            const result = await imageModel.generateContent([textPart, imagePart]);
             const response = await result.response;
             reply = response.text().trim();
         } else {
-            // Normal text chat with history
+            // Normal text chat with persistent session
             const chat = getChatSession(senderId);
             const result = await chat.sendMessage(text);
             const response = await result.response;
             reply = response.text().trim();
         }
 
+        console.log('[AI] Reply:', reply?.substring(0, 80));
         return reply || null;
     } catch (err) {
         console.error('[AI] Gemini Request failed:', err.message);
+        console.error('[AI] Full error:', JSON.stringify(err?.errorDetails || err?.status || '-'));
         return null;
     }
 }
@@ -133,3 +134,4 @@ function isAIAvailable() {
 }
 
 module.exports = { chatWithAI, isAIAvailable };
+
