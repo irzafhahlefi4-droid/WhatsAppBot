@@ -289,6 +289,9 @@ async function startBot() {
                 if (text === null && !isMedia) continue;
                 if (!text && isMedia) text = ''; // Ensure text handles empty captions
 
+                const sender = msg.key.remoteJid;
+                const pushName = msg.pushName || 'Unknown';
+
 
                 // Get user-specific data for this sender
                 const userData = getUserData(sender);
