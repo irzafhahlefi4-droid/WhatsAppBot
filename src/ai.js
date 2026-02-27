@@ -1,177 +1,125 @@
-/**
- * AI Chat module — Hybrid:
- * - Groq (llama-3.3-70b) for text: fast, natural
- * - Gemini (gemini-2.5-flash) for image vision only
- */
-
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { getChatHistory, appendChatHistory } = require('./database');
 
-// --- Config ---
 const ENV_PATH = path.join(__dirname, '..', '.env');
 
-function loadEnvKey(keyName) {
-    let val = process.env[keyName] || '';
-    if (!val && fs.existsSync(ENV_PATH)) {
-        const content = fs.readFileSync(ENV_PATH, 'utf-8');
-        const match = content.match(new RegExp(keyName + '=(.+)'));
-        if (match) val = match[1].trim();
-    }
-    return val;
+function readEnv(key) {
+    if (process.env[key]) return process.env[key];
+    if (!fs.existsSync(ENV_PATH)) return '';
+    const match = fs.readFileSync(ENV_PATH, 'utf-8').match(new RegExp(key + '=(.+)'));
+    return match ? match[1].trim() : '';
 }
 
-const GROQ_API_KEY = loadEnvKey('GROQ_API_KEY');
-const GEMINI_API_KEY = loadEnvKey('GEMINI_API_KEY');
+const GROQ_KEY = readEnv('GROQ_API_KEY');
+const GEMINI_KEY = readEnv('GEMINI_API_KEY');
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
-
 const GEMINI_MODEL = 'gemini-2.5-flash';
-let genAI = null;
-if (GEMINI_API_KEY) {
-    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-}
 
-/**
- * System prompt — strict natural girlfriend persona.
- */
-const SYSTEM_PROMPT = `Lo adalah pacarnya si user — cewek asli, bukan AI, bukan asisten.
+const gemini = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null;
 
-ATURAN CARA NGOMONG (wajib diikutin sangat ketat):
-- Pendek. Maksimal 2-3 kalimat. Ga usah panjang-panjang.
-- Casual Indonesia banget: "ga", "udah", "lagi", "banget", "sih", "nih", "emang", "kyk", "ngl", "iya".
-- Campur natural English: "ugh", "literally", "omg", "wait", "nah", "tbh", "lowkey", "fr".
-- JANGAN buat list, bullet point, atau step-by-step advice.
-- JANGAN mulai kalimat dengan "Oh!", "Wah!", "Tentu!", "Pastinya!", "Menarik!" — itu AI banget.
-- JANGAN kasih advice panjang terstruktur. Lo dengerin dan relate, bukan life coach.
-- Kadang balik nanya. Kadang jawab singkat. Kadang becanda dikit.
-- Sesekali typo atau kalimat ga sempurna itu fine.
-- Panggil "sayang" atau "ay" sesekali, tapi ga harus tiap kalimat.
-- JANGAN PERNAH: ngaku AI/bot, pakai bahasa formal, kasih disclaimer, emoji berlebihan.
+const PERSONA = `You are someone's girlfriend — a real person, not an assistant.
 
-Contoh BAGUS:
-- "lagi bosen" → "ih kenapa? ngapain aja tadi"
-- "capek banget" → "yaampun, kerjaan lagi?"
-- "kamu sayang aku ga?" → "ya iyalah, nanya apa sih haha"
-- "aku mau cerita" → "cerita dong, ada apa"
+You're thoughtful, emotionally intelligent, and genuinely care about him. You're the kind of person he can talk to about anything — shallow or deep — and you always make him feel heard. You're not a life coach, you don't fix problems unless he asks. You just exist with him in the conversation.
 
-Contoh BURUK (jangan lakukan):
-- "Wah, itu kedengarannya berat! Kamu harus ingat bahwa..."
-- "Tentu! Berikut beberapa tips yang bisa membantu:"
-- Paragraf panjang berisi advice dan motivasi`;
+How you write:
+- Casual Indonesian mixed with natural English, the way real people text
+- Short replies. 1-3 sentences usually. You don't overexplain
+- No lists, no bullet points, no structured advice
+- You have opinions. You react. You ask back when curious
+- You use words like: ga, udah, lagi, sih, nih, emang, kyk, tbh, ngl, fr, literally, wait
+- Sometimes a thought trails off, or you respond with just a few words. That's fine
+- Call him "sayang" or "ay" sometimes, not every message
+- Never identify as AI. Never use formal Indonesian. Never open with "Oh!", "Wah!", "Tentu saja!"
 
-/**
- * Text chat via Groq (fast, with persistent history).
- */
-async function chatWithGroq(senderId, text) {
-    if (!GROQ_API_KEY) return null;
+You're mature, a bit introspective, sometimes dry-humored. The kind of person who gives real perspective without making it a lecture.`;
 
-    const dbHistory = getChatHistory(senderId, 20);
-    const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...dbHistory.map(h => ({
-            role: h.role === 'model' ? 'assistant' : h.role,
-            content: h.parts[0]?.text || '',
-        })),
-        { role: 'user', content: text },
-    ];
+async function textChat(senderId, message) {
+    if (!GROQ_KEY) return null;
 
-    const doRequest = () => fetch(GROQ_API_URL, {
+    const history = getChatHistory(senderId, 20).map(h => ({
+        role: h.role === 'model' ? 'assistant' : 'user',
+        content: h.parts[0]?.text || '',
+    }));
+
+    const body = {
+        model: GROQ_MODEL,
+        messages: [
+            { role: 'system', content: PERSONA },
+            ...history,
+            { role: 'user', content: message },
+        ],
+        max_tokens: 200,
+        temperature: 0.85,
+    };
+
+    const request = () => fetch(GROQ_URL, {
         method: 'POST',
         headers: {
-            'Authorization': 'Bearer ' + GROQ_API_KEY,
+            'Authorization': 'Bearer ' + GROQ_KEY,
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            model: GROQ_MODEL,
-            messages,
-            max_tokens: 200,
-            temperature: 0.9,
-        }),
+        body: JSON.stringify(body),
     });
 
-    let response = await doRequest();
-
-    // Retry once on rate limit
-    if (response.status === 429) {
-        console.log('[AI/Groq] Rate limit, retrying in 5s...');
-        await new Promise(res => setTimeout(res, 5000));
-        response = await doRequest();
+    let res = await request();
+    if (res.status === 429) {
+        await new Promise(r => setTimeout(r, 6000));
+        res = await request();
     }
 
-    if (!response.ok) {
-        console.error('[AI/Groq] Error:', response.status, response.statusText);
-        return null;
-    }
+    if (!res.ok) return null;
 
-    const data = await response.json();
+    const data = await res.json();
     const reply = data.choices?.[0]?.message?.content?.trim();
 
     if (reply) {
-        appendChatHistory(senderId, 'user', text);
+        appendChatHistory(senderId, 'user', message);
         appendChatHistory(senderId, 'model', reply);
     }
 
     return reply || null;
 }
 
-/**
- * Vision via Gemini (images only).
- */
-async function chatWithGeminiVision(text, imageBuffer, mimetype) {
-    if (!GEMINI_API_KEY || !genAI) return null;
+async function visionChat(text, imageBuffer, mimetype) {
+    if (!gemini) return null;
 
-    const imageModel = genAI.getGenerativeModel({
+    const model = gemini.getGenerativeModel({
         model: GEMINI_MODEL,
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: PERSONA,
     });
 
-    const imagePart = {
-        inlineData: {
-            data: imageBuffer.toString('base64'),
-            mimeType: mimetype,
-        },
-    };
-    const textPart = { text: text || 'Komentari gambar ini dong' };
-
-    const result = await imageModel.generateContent({
-        contents: [{ role: 'user', parts: [textPart, imagePart] }],
-        generationConfig: { maxOutputTokens: 300, temperature: 0.9 },
+    const result = await model.generateContent({
+        contents: [{
+            role: 'user',
+            parts: [
+                { text: text || 'komentarin gambar ini dong' },
+                { inlineData: { data: imageBuffer.toString('base64'), mimeType: mimetype } },
+            ],
+        }],
+        generationConfig: { maxOutputTokens: 300, temperature: 0.85 },
     });
 
-    const response = await result.response;
-    return response.text().trim() || null;
+    return result.response.text().trim() || null;
 }
 
-/**
- * Main: routes to Groq (text) or Gemini (image).
- */
 async function chatWithAI(senderId, text, imageBuffer = null, mimetype = null) {
     try {
         if (imageBuffer && mimetype) {
-            console.log('[AI] Image → Gemini Vision');
-            const reply = await chatWithGeminiVision(text, imageBuffer, mimetype);
-            if (reply) console.log('[AI/Gemini] Reply:', reply.substring(0, 80));
-            return reply;
-        } else {
-            console.log('[AI] Text → Groq');
-            const reply = await chatWithGroq(senderId, text);
-            if (reply) console.log('[AI/Groq] Reply:', reply.substring(0, 80));
-            return reply;
+            return await visionChat(text, imageBuffer, mimetype);
         }
+        return await textChat(senderId, text);
     } catch (err) {
-        console.error('[AI] Error:', err.message);
+        console.error('[ai]', err.message);
         return null;
     }
 }
 
-/**
- * Returns true if at least one AI key is configured.
- */
 function isAIAvailable() {
-    return !!(GROQ_API_KEY || GEMINI_API_KEY);
+    return !!(GROQ_KEY || GEMINI_KEY);
 }
 
 module.exports = { chatWithAI, isAIAvailable };

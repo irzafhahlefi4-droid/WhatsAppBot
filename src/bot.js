@@ -1,17 +1,10 @@
-/**
- * WhatsApp Daily Assistant Bot
- * Main entry point — handles connection, authentication, and message routing.
- *
- * Uses @whiskeysockets/baileys with Multi File Auth State.
- * Supports multi-user: each sender has isolated data.
- */
-
 const {
     default: makeWASocket,
     useMultiFileAuthState,
     DisconnectReason,
     makeCacheableSignalKeyStore,
     fetchLatestBaileysVersion,
+    downloadMediaMessage,
 } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const { Boom } = require('@hapi/boom');
@@ -19,10 +12,7 @@ const qrcode = require('qrcode-terminal');
 const path = require('path');
 const fs = require('fs');
 
-// Database
 const { loadDB, getUserData, getUserCount } = require('./database');
-
-// Commands
 const { handleHalo, handleJam } = require('./commands/general');
 const { handleMenu } = require('./commands/menu');
 const { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo } = require('./commands/todo');
@@ -32,200 +22,85 @@ const { handleCurhat, handleFallback } = require('./commands/curhat');
 const { chatWithAI, isAIAvailable } = require('./ai');
 const { startAdmin } = require('./admin');
 
-// --- Config ---
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..');
 const AUTH_DIR = path.join(DATA_DIR, 'auth_info');
 const logger = pino({ level: 'silent' });
 
-// --- Start Banner ---
 console.log('========================================');
 console.log('   WhatsApp Daily Assistant Bot');
 console.log('   Powered by Irza Fhahlefi');
 console.log('========================================\n');
 
-// --- Load Database ---
 loadDB();
-console.log('[BOT] Database loaded.');
-console.log(`[BOT] Total user: ${getUserCount()}`);
-console.log(`[BOT] AI Chat: ${isAIAvailable() ? 'Aktif (Groq + Gemini Vision)' : 'Nonaktif — set GROQ_API_KEY di .env'}`);
+console.log(`[bot] ${getUserCount()} user loaded`);
+console.log(`[bot] AI ${isAIAvailable() ? 'active (Groq + Gemini Vision)' : 'inactive'}`);
 
-// --- Start Admin Panel ---
 startAdmin();
 
-// --- Message Handler ---
-
-/**
- * Extract text body from incoming message.
- * Supports: conversation, extendedTextMessage
- * @param {object} message - Baileys message object
- * @returns {string|null}
- */
-function extractMessageText(message) {
+function extractText(message) {
     if (!message) return null;
-
-    if (message.conversation) {
-        return message.conversation;
-    }
-
-    if (message.extendedTextMessage?.text) {
-        return message.extendedTextMessage.text;
-    }
-
-    if (message.imageMessage) {
-        return message.imageMessage.caption || '';
-    }
-
+    if (message.conversation) return message.conversation;
+    if (message.extendedTextMessage?.text) return message.extendedTextMessage.text;
+    if (message.imageMessage) return message.imageMessage.caption || '';
     return null;
 }
 
-/**
- * Route incoming text to the appropriate command handler.
- * Each command receives user-specific data (userData).
- * @param {string} text - The raw incoming message text
- * @param {object} userData - User-specific data { todo: [], pengeluaran: [] }
- * @returns {string|{type: 'export', handler: string}|null}
- */
 function routeCommand(text, userData) {
     const raw = text.trim();
-    const lower = raw.toLowerCase();
+    const cmd = raw.toLowerCase();
 
-    // -- export --
-    if (lower === 'export todo') {
-        return { type: 'export', handler: 'todo' };
-    }
-    if (lower === 'export pdf keuangan' || lower === 'export pdf pengeluaran') {
-        return { type: 'export', handler: 'keuangan-pdf' };
-    }
-    if (lower === 'export keuangan' || lower === 'export pengeluaran') {
-        return { type: 'export', handler: 'keuangan' };
-    }
+    if (cmd === 'export todo') return { type: 'export', handler: 'todo' };
+    if (cmd === 'export pdf keuangan' || cmd === 'export pdf pengeluaran') return { type: 'export', handler: 'keuangan-pdf' };
+    if (cmd === 'export keuangan' || cmd === 'export pengeluaran') return { type: 'export', handler: 'keuangan' };
+    if (cmd === 'reset keuangan' || cmd === 'reset pengeluaran') return handleResetKeuangan(userData);
+    if (cmd === 'reset todo') return handleResetTodo(userData);
+    if (cmd === 'halo' || cmd === 'hai' || cmd === 'hi' || cmd === 'hello') return handleHalo();
+    if (cmd === 'menu') return handleMenu();
+    if (cmd === 'jam') return handleJam();
+    if (cmd === 'total') return handleTotal(userData);
 
-    // -- reset --
-    if (lower === 'reset keuangan' || lower === 'reset pengeluaran') {
-        return handleResetKeuangan(userData);
+    if (cmd.startsWith('done')) return handleTodoDone(userData, raw.slice(4).trim());
+    if (cmd.startsWith('todo')) {
+        const args = raw.slice(4).trim();
+        return args ? handleTodoAdd(userData, args) : handleTodoList(userData);
     }
-    if (lower === 'reset todo') {
-        return handleResetTodo(userData);
-    }
-
-    // -- halo --
-    if (lower === 'halo' || lower === 'hai' || lower === 'hi' || lower === 'hello') {
-        return handleHalo();
-    }
-
-    // -- menu --
-    if (lower === 'menu') {
-        return handleMenu();
-    }
-
-    // -- jam --
-    if (lower === 'jam') {
-        return handleJam();
-    }
-
-    // -- done [nomor] --
-    if (lower.startsWith('done')) {
-        const args = raw.substring(4).trim();
-        return handleTodoDone(userData, args);
-    }
-
-    // -- todo / todo [isi] --
-    if (lower.startsWith('todo')) {
-        const args = raw.substring(4).trim();
-        if (args.length === 0) {
-            return handleTodoList(userData);
-        }
-        return handleTodoAdd(userData, args);
-    }
-
-    // -- edit [nomor] [nominal] [keterangan] (keuangan) --
-    if (lower.startsWith('edit')) {
-        const args = raw.substring(4).trim();
-        return handleEditPengeluaran(userData, args);
-    }
-
-    // -- hapus [nomor] (keuangan) --
-    if (lower.startsWith('hapus')) {
-        const args = raw.substring(5).trim();
-        return handleHapusPengeluaran(userData, args);
-    }
-
-    // -- catat [nominal] [keterangan] --
-    if (lower.startsWith('catat')) {
-        const args = raw.substring(5).trim();
-        return handleCatat(userData, args);
-    }
-
-    // -- batas [nominal] --
-    if (lower.startsWith('batas')) {
-        const args = raw.substring(5).trim();
-        return handleBatas(userData, args);
-    }
-
-    // -- total --
-    if (lower === 'total') {
-        return handleTotal(userData);
-    }
+    if (cmd.startsWith('edit')) return handleEditPengeluaran(userData, raw.slice(4).trim());
+    if (cmd.startsWith('hapus')) return handleHapusPengeluaran(userData, raw.slice(5).trim());
+    if (cmd.startsWith('catat')) return handleCatat(userData, raw.slice(5).trim());
+    if (cmd.startsWith('batas')) return handleBatas(userData, raw.slice(5).trim());
 
     return null;
 }
 
-/**
- * Handle export command — generate Excel/PDF and return file buffer.
- * @param {string} handler - 'todo', 'keuangan', or 'keuangan-pdf'
- * @param {object} userData - User-specific data
- * @returns {Promise<{text: string}|{document: Buffer, fileName: string, mimetype: string}>}
- */
-async function handleExport(handler, userData) {
-    let result;
-    let mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+async function sendExport(sock, sender, handler, userData) {
+    const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-    if (handler === 'todo') {
-        result = await exportTodoExcel(userData);
-        if (!result) {
-            return { text: 'Ga ada tugas yang bisa di-export nih sayang~' };
-        }
-    } else if (handler === 'keuangan') {
-        result = await exportFinanceExcel(userData);
-        if (!result) {
-            return { text: 'Ga ada catatan pengeluaran buat di-export sayang~' };
-        }
-    } else if (handler === 'keuangan-pdf') {
-        result = await exportFinancePDF(userData);
-        mimetype = 'application/pdf';
-        if (!result) {
-            return { text: 'Ga ada catatan pengeluaran buat dibikin PDF sayang~' };
-        }
-    }
-
-    // Read file into buffer for sending
-    const fileBuffer = fs.readFileSync(result.filePath);
-
-    // Clean up the file after reading
-    try { fs.unlinkSync(result.filePath); } catch (e) { /* ignore */ }
-
-    return {
-        document: fileBuffer,
-        fileName: result.fileName,
-        mimetype,
+    const exporters = {
+        'todo': [exportTodoExcel, XLSX_MIME, 'Ga ada tugas yang bisa di-export nih'],
+        'keuangan': [exportFinanceExcel, XLSX_MIME, 'Ga ada catatan pengeluaran buat di-export'],
+        'keuangan-pdf': [exportFinancePDF, 'application/pdf', 'Ga ada catatan pengeluaran buat dibikin PDF'],
     };
+
+    const [exporter, mimetype, emptyMsg] = exporters[handler];
+    const result = await exporter(userData);
+
+    if (!result) return sock.sendMessage(sender, { text: emptyMsg });
+
+    const buffer = fs.readFileSync(result.filePath);
+    try { fs.unlinkSync(result.filePath); } catch { }
+
+    return sock.sendMessage(sender, { document: buffer, fileName: result.fileName, mimetype });
 }
 
-// --- WhatsApp Connection ---
-
 async function startBot() {
-
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
 
-    // Fetch latest WA Web version to avoid 405 errors
     let version;
     try {
-        const versionInfo = await fetchLatestBaileysVersion();
-        version = versionInfo.version;
-        console.log(`[AUTH] WA Web version: ${version.join('.')}`);
-    } catch (err) {
+        const info = await fetchLatestBaileysVersion();
+        version = info.version;
+    } catch {
         version = [2, 3000, 1015901307];
-        console.log(`[AUTH] Version fetch failed, using fallback: ${version.join('.')}`);
     }
 
     const sock = makeWASocket({
@@ -239,42 +114,29 @@ async function startBot() {
         generateHighQualityLinkPreview: false,
     });
 
-    // -- Connection Updates --
-    sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect, qr } = update;
-
+    sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
         if (qr) {
-            console.log('\n[AUTH] Scan QR code di bawah ini untuk login:\n');
+            console.log('\n[auth] Scan QR:\n');
             qrcode.generate(qr, { small: true });
         }
 
         if (connection === 'close') {
-            const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-
-            console.log(`[CONN] Koneksi terputus. Reason: ${reason}`);
-
-            if (reason === DisconnectReason.loggedOut) {
-                console.log('[CONN] Logged out. Hapus folder auth_info dan scan ulang QR.');
+            const code = new Boom(lastDisconnect?.error)?.output?.statusCode;
+            if (code === DisconnectReason.loggedOut) {
+                console.log('[conn] Logged out. Hapus auth_info dan scan ulang.');
                 process.exit(1);
             }
-
-            console.log('[CONN] Mencoba reconnect...');
-            setTimeout(() => startBot(), 3000);
+            setTimeout(startBot, 3000);
         }
 
         if (connection === 'open') {
-            console.log('[CONN] Bot berhasil terhubung ke WhatsApp.');
-            console.log('[CONN] Bot siap menerima pesan.\n');
-
-            // Clean up old export files on connect
+            console.log('[conn] Connected\n');
             cleanupExports();
         }
     });
 
-    // -- Save Credentials on Update --
     sock.ev.on('creds.update', saveCreds);
 
-    // -- Message Handler --
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
 
@@ -283,127 +145,71 @@ async function startBot() {
                 if (msg.key.fromMe) continue;
                 if (msg.key.remoteJid === 'status@broadcast') continue;
 
-                const isMedia = msg.message?.imageMessage || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
-                let text = extractMessageText(msg.message);
+                const hasImage = msg.message?.imageMessage
+                    || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
 
-                if (text === null && !isMedia) continue;
-                if (!text && isMedia) text = ''; // Ensure text handles empty captions
+                let text = extractText(msg.message);
+                if (text === null && !hasImage) continue;
+                if (!text && hasImage) text = '';
 
                 const sender = msg.key.remoteJid;
-                const pushName = msg.pushName || 'Unknown';
-
-
-                // Get user-specific data for this sender
+                const name = msg.pushName || 'Unknown';
                 const userData = getUserData(sender);
 
-                // Log incoming message
-                console.log(`[MSG] Dari: ${pushName} (${sender})`);
-                console.log(`[MSG] Pesan: ${text}`);
+                console.log(`[msg] ${name}: ${text || '[image]'}`);
 
-                // Route to command handler with user-specific data
-                const response = routeCommand(text || '', userData);
+                const command = routeCommand(text || '', userData);
 
-                if (response && text) {
-                    const commandName = text.trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase();
-                    console.log(`[CMD] Menjalankan: ${commandName}`);
-
-                    // Handle export commands (returns file)
-                    if (typeof response === 'object' && response.type === 'export') {
-                        const exportResult = await handleExport(response.handler, userData);
-
-                        if (exportResult.text) {
-                            await sock.sendMessage(sender, { text: exportResult.text });
-                        } else {
-                            await sock.sendMessage(sender, {
-                                document: exportResult.document,
-                                fileName: exportResult.fileName,
-                                mimetype: exportResult.mimetype,
-                            });
-                            console.log(`[CMD] File terkirim: ${exportResult.fileName}`);
-                        }
+                if (command && text) {
+                    if (typeof command === 'object' && command.type === 'export') {
+                        await sendExport(sock, sender, command.handler, userData);
                     } else {
-                        await sock.sendMessage(sender, { text: response });
+                        await sock.sendMessage(sender, { text: command });
                     }
+                    continue;
+                }
 
-                    console.log(`[CMD] Response terkirim ke ${pushName}`);
-                } else {
-                    // Non-command message — use AI or keyword fallback
-                    let chatReply = null;
+                let imageBuffer = null;
+                let mimeType = null;
 
-                    // Extract Image Buffer if message contains an image
-                    let imageBuffer = null;
-                    let mimeType = null;
-                    const isImage = msg.message?.imageMessage || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
-
-                    if (isAIAvailable() && isImage) {
-                        try {
-                            console.log(`[BOT] Mendownload gambar dari ${pushName}...`);
-                            // downloadMediaMessage is a helper from baileys
-                            const { downloadMediaMessage } = require('@whiskeysockets/baileys');
-
-                            // the message could be the main message or quoted message
-                            const targetMsg = msg.message?.imageMessage ? msg : {
-                                key: msg.key,
-                                message: msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
-                            };
-
-                            imageBuffer = await downloadMediaMessage(
-                                targetMsg,
-                                'buffer',
-                                {},
-                                {
-                                    logger,
-                                    reuploadRequest: sock.updateMediaMessage
-                                }
-                            );
-                            mimeType = targetMsg.message.imageMessage.mimetype || 'image/jpeg';
-                            console.log(`[BOT] Gambar berhasil didownload.`);
-                        } catch (imgErr) {
-                            console.error(`[ERR] Gagal mendownload media: ${imgErr}`);
-                        }
-                    }
-
-                    // Try AI first
-                    if (isAIAvailable() && (text || imageBuffer)) {
-                        chatReply = await chatWithAI(sender, text || '', imageBuffer, mimeType);
-                        if (chatReply) {
-                            console.log(`[AI] Response generated`);
-                        } else {
-                            // AI available but failed (rate limit etc) — send natural recovery message
-                            const recoveryMessages = [
-                                'Eh sorry ay, lagi gangguan bentar. Coba lagi ya?',
-                                'Hmm, koneksi aku agak ngadat nih. Ulangi ya sayang?',
-                                'Aduh, tadi keputus. Ngomong apa tadi?',
-                                'Sorry bentar, ulangi lagi dong ay',
-                            ];
-                            chatReply = recoveryMessages[Math.floor(Math.random() * recoveryMessages.length)];
-                            console.log(`[AI] Failed — sending recovery message`);
-                        }
-                    }
-
-                    // Keyword fallback ONLY when no AI key configured (no Gemini)
-                    if (!chatReply && !isAIAvailable() && text) {
-                        chatReply = handleCurhat(text) || handleFallback(text);
-                        console.log(`[CHAT] Keyword fallback (no AI)`);
-                    }
-
-                    // Only send a message if we actually generated a chat reply
-                    if (chatReply) {
-                        await sock.sendMessage(sender, { text: chatReply });
-                        console.log(`[CHAT] Response terkirim ke ${pushName}`);
+                if (hasImage && isAIAvailable()) {
+                    try {
+                        const targetMsg = msg.message?.imageMessage ? msg : {
+                            key: msg.key,
+                            message: msg.message?.extendedTextMessage?.contextInfo?.quotedMessage,
+                        };
+                        imageBuffer = await downloadMediaMessage(targetMsg, 'buffer', {}, {
+                            logger,
+                            reuploadRequest: sock.updateMediaMessage,
+                        });
+                        mimeType = targetMsg.message.imageMessage.mimetype || 'image/jpeg';
+                    } catch (err) {
+                        console.error('[media]', err.message);
                     }
                 }
 
-                console.log('');
+                let reply = null;
+
+                if (isAIAvailable() && (text || imageBuffer)) {
+                    reply = await chatWithAI(sender, text || '', imageBuffer, mimeType);
+                }
+
+                if (!reply && !isAIAvailable() && text) {
+                    reply = handleCurhat(text) || handleFallback(text);
+                }
+
+                if (reply) {
+                    await sock.sendMessage(sender, { text: reply });
+                }
+
             } catch (err) {
-                console.error('[ERR] Error memproses pesan:', err.message);
+                console.error('[err]', err.message);
             }
         }
     });
 }
 
-// --- Start ---
-startBot().catch((err) => {
-    console.error('[FATAL] Gagal memulai bot:', err);
+startBot().catch(err => {
+    console.error('[fatal]', err);
     process.exit(1);
 });
