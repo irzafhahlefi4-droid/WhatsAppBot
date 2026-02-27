@@ -26,7 +26,7 @@ const { loadDB, getUserData, getUserCount } = require('./database');
 const { handleHalo, handleJam } = require('./commands/general');
 const { handleMenu } = require('./commands/menu');
 const { handleTodoList, handleTodoAdd, handleTodoDone, handleResetTodo } = require('./commands/todo');
-const { handleCatat, handleTotal, handleHapusPengeluaran, handleEditPengeluaran, handleResetKeuangan } = require('./commands/finance');
+const { handleCatat, handleTotal, handleHapusPengeluaran, handleEditPengeluaran, handleResetKeuangan, handleBatas } = require('./commands/finance');
 const { exportTodoExcel, exportFinanceExcel, exportFinancePDF, cleanupExports } = require('./commands/export');
 const { handleCurhat, handleFallback } = require('./commands/curhat');
 const { chatWithAI, isAIAvailable } = require('./ai');
@@ -150,6 +150,12 @@ function routeCommand(text, userData) {
     if (lower.startsWith('catat')) {
         const args = raw.substring(5).trim();
         return handleCatat(userData, args);
+    }
+
+    // -- batas [nominal] --
+    if (lower.startsWith('batas')) {
+        const args = raw.substring(5).trim();
+        return handleBatas(userData, args);
     }
 
     // -- total --
