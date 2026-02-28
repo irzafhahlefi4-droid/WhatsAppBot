@@ -135,18 +135,14 @@ function buildSpendingMeter(db) {
     if (!limit || limit <= 0) return '';
 
     const todayTotal = getTodayTotal(db);
-    const ratio = Math.min(todayTotal / limit, 1.5);
+    const ratio = todayTotal / limit;
     const pct = Math.round(ratio * 100);
 
-    const filled = Math.min(Math.round(ratio * 10), 10);
-    const empty = 10 - filled;
-    const bar = '█'.repeat(filled) + '░'.repeat(empty);
-
     let status = 'Aman';
-    if (ratio >= 1) status = 'Over';
-    else if (ratio >= 0.75) status = 'Hampir';
+    if (ratio > 1) status = 'Over Limit';
+    else if (ratio >= 0.75) status = 'Mendekati Limit';
 
-    return `\n[${bar}] ${pct}% — ${status} (batas ${formatRupiah(limit)})`;
+    return `\nStatus: ${pct}% / ${formatRupiah(limit)} (${status})`;
 }
 
 // =============================================
