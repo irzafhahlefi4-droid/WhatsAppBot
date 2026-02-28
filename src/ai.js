@@ -38,7 +38,8 @@ Tone: cewek cerdas, temen diskusi yang asik, pacar yang loving & caring. The kin
 
 function cleanReply(text) {
     if (!text) return text;
-    return text.replace(/\.{2,}/g, '').trim();
+    // Replace "..." with a single "." so we don't destroy sentence punctuation
+    return text.replace(/\.{2,}/g, '.').trim();
 }
 
 async function chatWithAI(senderId, text) {
@@ -62,8 +63,8 @@ async function chatWithAI(senderId, text) {
                 ...history,
                 { role: 'user', content: text },
             ],
-            max_tokens: 200,
-            temperature: 0.85,
+            max_tokens: 300,
+            temperature: 0.8,
         }),
     });
 
