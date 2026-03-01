@@ -13,43 +13,43 @@ function pick(arr) {
 }
 
 /**
- * Handle "halo" command — mature bilingual girlfriend greeting.
+ * Handle "halo" command — Gen Z girlfriend greeting.
  */
 function handleHalo() {
     const jam = getJamWIB();
 
     if (jam >= 4 && jam < 11) {
         return pick([
-            'Morning sayang. Udah sarapan?',
-            'Morning ay! hope u slept well',
-            'Pagi! I\'ve been waiting for u to text hehe',
-            'Morning ay. Don\'t forget to hydrate ya',
-            'Hai sayang, start ur day right ok?',
+            'pagi sayang. udh sarapan?',
+            'morning ay! semoga harinya oke',
+            'pagiii. jgn lupa sarapan ya',
+            'hai! baru bangun?',
+            'morning. minum air dulu gih sebelum ngapa-ngapain',
         ]);
     } else if (jam >= 11 && jam < 15) {
         return pick([
-            'Hey sayang, have u eaten yet?',
-            'Hai ay! don\'t forget to take a break tbh',
-            'Lagi sibuk ya? make sure u eat ok?',
-            'Hey ay, how\'s ur day so far?',
-            'Hai sayang, don\'t overwork urself ya',
+            'hei sayang, udh makan siang?',
+            'hai ay! lagi sibuk?',
+            'lagi istirahat atau masih nonstop nih',
+            'hay, gimana harinya sejauh ini?',
+            'hai sayang, jgn skip makan ya',
         ]);
     } else if (jam >= 15 && jam < 18) {
         return pick([
-            'Hey sayang, how was ur day?',
-            'Hai ay! tell me about ur day',
-            'Sore sayang. U doing ok?',
-            'Hey ay, lagi mikirin kamu hm',
-            'Hai sayang, almost evening. How\'s everything?',
+            'hei sayang, harinya gimana?',
+            'hai ay! capek?',
+            'sore nih. bentar lagi pulang?',
+            'hay, cerita dong harinya',
+            'hei, kamu baik-baik aja?',
         ]);
     } else {
         return pick([
-            'Hey sayang, don\'t stay up too late ok?',
-            'Hai ay! have u had dinner?',
-            'U still up hm? I appreciate the company',
-            'Hey ay, how was ur day? tell me',
-            'Night sayang. Take care of urself',
-            'Hai ay, I\'m always here whenever u need me tbh',
+            'hei sayang, jgn begadang bgt ya',
+            'hai ay! udh makan malem?',
+            'masih melek juga nih. gimana harinya?',
+            'hei, cerita dong hari ini gimana',
+            'malam sayang. istirahat yg bener ok',
+            'hai ay, aku di sini kok kalau mau ngobrol',
         ]);
     }
 }
@@ -70,7 +70,7 @@ function handleJam() {
         timeZone: 'Asia/Jakarta', hour12: false,
     });
 
-    return `It's ${tanggal}, ${waktu} WIB right now, sayang`;
+    return `sekarang ${tanggal}, ${waktu} WIB sayang`;
 }
 
 module.exports = { handleHalo, handleJam };
